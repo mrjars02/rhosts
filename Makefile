@@ -1,6 +1,8 @@
 dir: 
 	mkdir -p /usr/local/share/removeadhosts
 install: dir
+	mkdir /etc/removeadhosts
+	touch /etc/removeadhosts/ads.txt
 	cp src/* /usr/local/share/removeadhosts/
 	chown -R root:root /usr/local/share/removeadhosts
 	chmod +x /usr/local/share/removeadhosts/removeadhosts.sh
@@ -15,5 +17,7 @@ deactivate:
 remove: deactivate
 	rm -f /etc/systemd/system/removeadhosts*
 	rm -fr /usr/local/share/removeadhosts/
+purge: remove
+	rm -fr /etc/removeadhosts
 
 reinstall: remove activate

@@ -14,3 +14,12 @@ fi
 echo 'Downloading ad list'
 
 curl https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts 2>/dev/null | tee -a /etc/hosts >/dev/null
+
+echo 'Adding custom items from /etc/removeadhosts'
+if [ -e /etc/removeadhosts/adlist.txt ]
+then
+        cat /etc/removeadhosts/adlist.txt | \
+        while read CMD; do
+            echo "0.0.0.0 $CMD" >> /etc/hosts
+        done
+fi
