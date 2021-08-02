@@ -25,6 +25,7 @@ fi
 echo 'Adding custom items from /etc/removeadhosts'
 if [ -e /etc/removeadhosts/adlist.txt ]
 then
+        echo "# Custom ad list" >> /etc/hosts
         cat /etc/removeadhosts/adlist.txt | \
         while read CMD; do
             echo "0.0.0.0 $CMD" >> /etc/hosts
