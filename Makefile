@@ -16,4 +16,4 @@ remove: deactivate
 	rm -f /etc/systemd/system/removeadhosts*
 	rm -fr /usr/local/share/removeadhosts/
 
-reinstall: remove install
+reinstall: remove activate
