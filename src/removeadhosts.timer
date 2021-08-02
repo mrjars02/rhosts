@@ -1,0 +1,10 @@
+[Unit]
+Description=update host file to remove ads weekly
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=1w
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

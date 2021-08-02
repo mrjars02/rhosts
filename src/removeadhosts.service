@@ -1,0 +1,9 @@
+[Unit]
+Description=update the hosts file to remove ads
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/share/removeadhosts/removeadhosts.sh
+
+[Install]
+WantedBy=multi-user.target
