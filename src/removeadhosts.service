@@ -1,5 +1,7 @@
 [Unit]
 Description=update the hosts file to remove ads
+Wants=network-online.target
+After=network.target network-online.target
 
 [Service]
 Type=oneshot
