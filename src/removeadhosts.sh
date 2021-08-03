@@ -23,18 +23,34 @@ if [ -e /etc/removeadhosts/adlistings.txt ]
 then
         cat /etc/removeadhosts/adlistings.txt | \
         while read SITE; do
-            echo "# removeadhosts site - $SITE" >> /etc/hosts
-            curl $SITE 2>/dev/null | tee -a /etc/hosts >/dev/null
-            echo "# removeadhosts site - end" >> /etc/hosts
+            ESC_SITE=$(printf '%s\n' "$SITE" | sed -e 's/[\/&]/\\&/g')
+            echo "# removeadhosts site - $SITE" >> /tmp/removeadhosts-curlbuff
+            RC=0 ; curl $SITE >> /tmp/removeadhosts-curlbuff 2>/dev/null || RC=$?
+            echo "# removeadhosts site - $SITE - end" >> /tmp/removeadhosts-curlbuff
+            if [ $(cat /tmp/removeadhosts-curlbuff | wc -l) -lt 3 ] || [ ! $RC -eq 0 ]
+            then
+                    if [ $(sed -n "/removeadhosts site - $ESC_SITE/,/removeadhosts site - $ESC_SITE - end/p" /tmp/removeadhosts-curl | wc -l) -gt 2 ]
+                    then
+                            echo "Keeping old version of $SITE"
+                            if [ $(cat /tmp/removeadhosts-curlbuff | wc -l) -eq 2 ]
+                            then
+                                    echo "Nothing was downloaded"
+                            else
+                                    echo "New version is $(cat /tmp/removeadhosts-curlbuff | wc -l) lines long"
+                            fi
+                            sed -n "/removeadhosts site - $ESC_SITE/,/removeadhosts site - $EXC_SITE - end/p" /tmp/removeadhosts-curl | tee -a /etc/hosts > /dev/null
+                    else
+                            echo "Unable to add $SITE"
+                            
+                    fi
+            else
+                    echo "Updating $(cat /tmp/removeadhosts-curlbuff | wc -l) lines from $SITE"
+                    cat /tmp/removeadhosts-curlbuff | tee -a /etc/hosts >dev/null
+            fi
         done
 fi
-
-if [ $(sed -n '/# start of removeadhosts/,/# Custom ad list/p' /etc/hosts | sed -e '/# Custom ad list/d' -e '1d' | wc -l) -lt 2 ]
-then
-        echo "No hosts were downloaded, reusing the old ones"
-        cat /tmp/removeadhosts-curl | tee -a /etc/hosts >/dev/null
-fi
 rm /tmp/removeadhosts-curl
+rm /tmp/removeadhosts-curlbuff
 
 
 # Add entries from adlist
