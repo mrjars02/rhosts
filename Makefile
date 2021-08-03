@@ -9,6 +9,7 @@ install: dir
 	cp /usr/local/share/removeadhosts/removeadhosts.service /etc/systemd/system/
 	cp /usr/local/share/removeadhosts/removeadhosts.timer /etc/systemd/system/
 	cp /usr/local/share/removeadhosts/removeadhosts.path /etc/systemd/system/
+	systemctl daemon-reload
 activate: install
 	systemctl enable removeadhosts.timer
 	systemctl start removeadhosts.timer
