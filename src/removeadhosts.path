@@ -1,0 +1,10 @@
+[Unit]
+Description="Monitor the /etc/passwd file for changes"
+
+[Path]
+PathModified=/etc/removeadhosts/adlist.txt
+PathModified=/etc/removeadhosts/adlistings.txt
+Unit=removeadhosts.service
+
+[Install]
+WantedBy=multi-user.target

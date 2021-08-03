@@ -8,12 +8,17 @@ install: dir
 	chmod +x /usr/local/share/removeadhosts/removeadhosts.sh
 	cp /usr/local/share/removeadhosts/removeadhosts.service /etc/systemd/system/
 	cp /usr/local/share/removeadhosts/removeadhosts.timer /etc/systemd/system/
+	cp /usr/local/share/removeadhosts/removeadhosts.path /etc/systemd/system/
 activate: install
 	systemctl enable removeadhosts.timer
 	systemctl start removeadhosts.timer
+	systemctl enable removeadhosts.path
+	systemctl start removeadhosts.path
 deactivate: 
 	systemctl disable removeadhosts.timer
 	systemctl stop removeadhosts.timer
+	systemctl disable removeadhosts.path
+	systemctl stop removeadhosts.path
 remove: deactivate
 	rm -f /etc/systemd/system/removeadhosts*
 	rm -fr /usr/local/share/removeadhosts/
