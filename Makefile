@@ -2,7 +2,7 @@ dir:
 	if [ ! -d /usr/local/share/removeadhosts ];then mkdir -p /usr/local/share/removeadhosts;fi
 	if [ ! -d /etc/removeadhosts ];then mkdir /etc/removeadhosts;fi
 install: dir
-	touch /etc/removeadhosts/ads.txt
+	touch /etc/removeadhosts/{adlist.txt,adlistings.txt
 	cp src/* /usr/local/share/removeadhosts/
 	chown -R root:root /usr/local/share/removeadhosts
 	chmod +x /usr/local/share/removeadhosts/removeadhosts.sh
