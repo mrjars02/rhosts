@@ -45,7 +45,7 @@ then
                     fi
             else
                     echo "Updating $(cat /tmp/removeadhosts-curlbuff | wc -l) lines from $SITE"
-                    cat /tmp/removeadhosts-curlbuff | tee -a /etc/hosts >dev/null
+                    cat /tmp/removeadhosts-curlbuff | tee -a /etc/hosts >/dev/null
             fi
         done
 fi
