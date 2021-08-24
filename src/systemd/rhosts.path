@@ -1,0 +1,9 @@
+[Unit]
+Description="Monitor the /etc/passwd file for changes"
+
+[Path]
+PathModified=/etc/rhosts.cfg
+Unit=rhosts.service
+
+[Install]
+WantedBy=multi-user.target
