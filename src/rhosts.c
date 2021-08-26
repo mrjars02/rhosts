@@ -129,13 +129,14 @@ int preserve_static_entries(){
         char c = EOF;
         int rc = 0;
 
+        printf("Static hosts are:\n");
         do{
                 c = fgetc(hostsf);
-                printf("%c",c);
                 strncat(buff, &c, 1);
                 if (strncmp(buff, "# rhosts begin", 14) == 0){c = EOF;}
                 if (c == '\n'){
                         rc = fputs(buff, tmpf);
+                        printf("%s",buff);
                         buff[0] = '\0';
                 }
         }while ( c != EOF);
