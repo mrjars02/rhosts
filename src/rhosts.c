@@ -18,6 +18,7 @@ int main(int argc, char *argv[]){
         if (rc != 0){return rc;}
 
         parse_config(&entries);
+        rc = preserve_static_entries();
 
 
         // Closing files before exiting
@@ -122,4 +123,23 @@ short int determine_config_entry_value(char *buff){
         else if (strcmp(buff,"site") == 0){return CONTENTTYPE_SITE;}
         else if (strcmp(buff,"download") == 0){return CONTENTTYPE_DOWNLOAD;}
         else {return CONTENTTYPE_ERROR;}
+}
+
+// Copies the beginning of the hosts file to tmpfile
+int preserve_static_entries(){
+        FILE *hostsf;
+        FILE *tmpf;
+        hostsf = fopen(HOSTSLOCATION, "r");
+        if (hostsf == NULL){return 1;}
+        tmpf = fopen(TMPLOCATION,"w");
+        if (tmpf == NULL){
+                fclose(hostsf);
+                return 1;
+        }
+
+        
+        
+        fclose(hostsf);
+        fclose(tmpf);
+        return 0;
 }
