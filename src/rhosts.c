@@ -17,6 +17,11 @@ int main(int argc, char *argv[]){
                 printf("%d - preserve_static_entries failed",rc);
                 return rc;
         }
+        rc = download_entries(&entries);
+        if (rc != 0){
+                printf("%d - download_entries failed",rc);
+                return rc;
+        }
         return 0;
 }
 
@@ -139,5 +144,17 @@ int preserve_static_entries(){
         
         fclose(hostsf);
         fclose(tmpf);
+        return 0;
+}
+
+// This will download entries from the config
+int download_entries(struct entry **entries){
+        printf("Downloading of entries is currently unavailable\n");
+        int i = (*entries)[0].entrytype;
+        for (;i >0 ; i--){
+                if ((*entries)[i].entrytype == CONTENTTYPE_DOWNLOAD){
+                        printf("Download: %s\n",(*entries)[i].entry);
+                }
+        }
         return 0;
 }
