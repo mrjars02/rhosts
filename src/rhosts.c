@@ -22,6 +22,11 @@ int main(int argc, char *argv[]){
                 printf("%d - download_entries failed",rc);
                 return rc;
         }
+        rc = add_site_entries(&entries);
+        if (rc != 0){
+                printf("%d - download_entries failed",rc);
+                return rc;
+        }
         return 0;
 }
 
@@ -193,6 +198,44 @@ int download_entries(struct entry **entries){
                         // Here is where the download func should be called
                 }
         }
+
+        fclose(tmpf);
+        fclose(tmpdf);
         remove(TMPDOWNLOADLOCATION);
+        return 0;
+}
+int add_site_entries(struct entry **entries){
+        int i = (*entries)[0].entrytype;
+        int rc = 0;
+        FILE *tmpf;
+        tmpf = fopen(TMPLOCATION,"a");
+        if (tmpf == NULL){
+                return 1;
+        }
+
+
+        rc = fputs("# rhosts - static begin\n", tmpf);
+        if (rc == EOF){
+                printf("Failed to write to tmp file\n");
+                fclose(tmpf);
+                return 1;
+        }
+        for (;i >0 ; i--){
+                if ((*entries)[i].entrytype == CONTENTTYPE_SITE){
+                        fprintf(tmpf, "0.0.0.0 %s\n:: %s\n", \
+                                        (*entries)[i].entry, \
+                                        (*entries)[i].entry);
+
+                }
+
+        }
+        rc = fputs("# rhosts - static end\n# rhosts end\n", tmpf);
+        if (rc == EOF){
+                printf("Failed to write to tmp file\n");
+                fclose(tmpf);
+                return 1;
+        }
+
+        fclose(tmpf);
         return 0;
 }

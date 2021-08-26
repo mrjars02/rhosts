@@ -40,4 +40,5 @@ int closefile(FILE **file, char *location);
 short int determine_config_entry_value(char *buff);
 int preserve_static_entries();
 int download_entries(struct entry **entries);
+int add_site_entries(struct entry **entries);
 #endif
