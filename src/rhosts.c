@@ -3,19 +3,9 @@
 
 
 int main(int argc, char *argv[]){
-        FILE *hostsfile;
-        FILE *tmpfile;
-        FILE *downloadfile;
-        FILE *configfile;
         struct entry *entries;
         int rc =0;
 
-        rc = openfile(&hostsfile, "r+", HOSTSLOCATION);
-        if (rc != 0){return rc;}
-        rc = openfile(&tmpfile, "w+", TMPLOCATION);
-        if (rc != 0){return rc;}
-        rc = openfile(&downloadfile, "w+", TMPDOWNLOADLOCATION);
-        if (rc != 0){return rc;}
 
         rc = parse_config(&entries);
         if (rc != 0){
@@ -27,20 +17,6 @@ int main(int argc, char *argv[]){
                 printf("%d - preserve_static_entries failed",rc);
                 return rc;
         }
-
-
-        // Closing files before exiting
-
-        rc = closefile(&hostsfile, HOSTSLOCATION);
-        if (rc != 0){return rc;}
-        rc = closefile(&tmpfile, TMPLOCATION);
-        if (rc != 0){return rc;}
-        rc = remove(TMPLOCATION);
-        if (rc != 0){return rc;}
-        rc = closefile(&downloadfile, TMPDOWNLOADLOCATION);
-        if (rc != 0){return rc;}
-        rc = remove(TMPDOWNLOADLOCATION);
-        if (rc != 0){return rc;}
         return 0;
 }
 
