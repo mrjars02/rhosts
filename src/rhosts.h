@@ -20,16 +20,21 @@
 #else
 #endif
 
-
-#define STATIC 0
+// entry types
+#define CONTENTTYPE_ERROR 5
+#define CONTENTTYPE_BLANK 0
+#define CONTENTTYPE_SITE 1
+#define CONTENTTYPE_DOWNLOAD 2
+#define CONTENTTYPE_COMMENT 3
 
 struct entry{
         int entrytype;
-        char *entry;
+        char entry[500];
 };
 
 int parse_config(struct entry **entries);
 
 int openfile(FILE **file, char *mode, char *location);
 int closefile(FILE **file, char *location);
+short int determine_config_entry_value(char *buff);
 #endif

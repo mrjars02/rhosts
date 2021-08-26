@@ -42,22 +42,56 @@ int parse_config(struct entry **entries){
         configfile = fopen(CONFIGFILE, "r+");
         if (configfile == NULL){return 1;}
         *entries = malloc(sizeof(struct entry));
+        if (entries == NULL){return 1;}
         entries[0]->entrytype = 0;
         char c='\0';
-        char *buff = malloc(sizeof(char));
-        short int valtyp = 1;
-        int *j = &entries[0]->entrytype; // Used to make easier to read
-        if (entries == NULL){return 1;}
+        char buff[500];
+        buff[0]='\0';
+        short int valtyp = CONTENTTYPE_BLANK;
+        int *j = NULL;
+        j = &(*entries)[0].entrytype; // Used to make easier to read
+
         do{
-                c = getc(configfile);
-                buff = realloc(buff, sizeof(buff) + sizeof(char));
-                buff[sizeof(buff)-1] = c;
-                if (c == ':' && valtyp == 1){
-                        *j += 1;
+                c = fgetc(configfile);
+                // Detect if a comment
+                if (strncmp(buff, "#",(long unsigned int)1) == 0 && \
+                                valtyp == CONTENTTYPE_BLANK){
+                        while (c != '\n' && c != EOF){c =fgetc(configfile);}
+                }
+                // Detect end of value type string
+                if (c == '=' && valtyp == CONTENTTYPE_BLANK){
+                        valtyp = determine_config_entry_value(buff);
+                        if (valtyp == CONTENTTYPE_ERROR){
+                                return 1;
+                        }
+                        buff[0]='\0';
                 }
 
-
-        }while (c != '\0');
+                // Detect end of entry
+                else if ((c == '\n' || c == EOF) \
+                                && valtyp != CONTENTTYPE_BLANK){
+                        (*entries)[0].entrytype++;
+                        *entries = (struct entry *)reallocarray(*entries,\
+                                        (*j + 1), sizeof(struct entry));
+                        if (*entries == NULL){return 1;}
+                        j = &(*entries)[0].entrytype;
+                        (*entries)[*j].entrytype=valtyp;
+                        strcpy((*entries)[*j].entry,buff);
+                        buff[0] = '\0';
+                        valtyp = CONTENTTYPE_BLANK;
+                } 
+                else if (c == '\n' || c == EOF){ // Clear blank lines
+                        buff[0] = '\0';
+                }
+                else{
+                        strncat(buff, &c, 1);
+                }
+        }while (c != EOF);
+//        int k = 1;
+//        for (k=1;k<*j;k++){
+//                printf("%d - %s\n",(*entries)[k].entrytype,\
+//                                (*entries)[k].entry);
+//        }
 
         rc = fclose(configfile);
         if (rc != 0){return 1;}
@@ -79,4 +113,10 @@ int openfile(FILE **file, char *mode, char *location){
                 return errno;
         }
         return 0;
+}
+short int determine_config_entry_value(char *buff){
+        if (strncmp(buff,"#", 1) == 0){return CONTENTTYPE_COMMENT;}
+        else if (strcmp(buff,"site") == 0){return CONTENTTYPE_SITE;}
+        else if (strcmp(buff,"download") == 0){return CONTENTTYPE_DOWNLOAD;}
+        else {return CONTENTTYPE_ERROR;}
 }
