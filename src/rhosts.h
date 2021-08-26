@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <curl/curl.h>
+
 #ifdef _WIN64
 #define TMPLOCATION "/tmp/rhosts"
 #define TMPDOWNLOADLOCATION "/tmp/rhostsdownload"
@@ -41,4 +43,6 @@ short int determine_config_entry_value(char *buff);
 int preserve_static_entries();
 int download_entries(struct entry **entries);
 int add_site_entries(struct entry **entries);
+int download_libcurl(char *e);
+int parse_download(char *buff, size_t size, size_t nmemb);
 #endif

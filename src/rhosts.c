@@ -166,7 +166,6 @@ int preserve_static_entries(){
 
 // This will download entries from the config
 int download_entries(struct entry **entries){
-        printf("Downloading of entries is currently unavailable\n");
         int i = (*entries)[0].entrytype;
         int rc = 0;
         FILE *tmpf;
@@ -188,6 +187,7 @@ int download_entries(struct entry **entries){
                         printf("Download: %s\n",(*entries)[i].entry);
                         rc = fprintf(tmpf, "# rhosts download - %s", \
                                         (*entries)[i].entry);
+                        fflush(tmpf);
                         if (rc == EOF){
                                 printf("Failed to write to %s\n", \
                                                 TMPDOWNLOADLOCATION);
@@ -195,7 +195,7 @@ int download_entries(struct entry **entries){
                                 fclose(tmpf);
                                 return 1;
                         }
-                        // Here is where the download func should be called
+                        download_libcurl((*entries)[i].entry);
                 }
         }
 
@@ -238,4 +238,48 @@ int add_site_entries(struct entry **entries){
 
         fclose(tmpf);
         return 0;
+}
+// Uses libcurl to download and add file to tmpf
+int download_libcurl(char *e){
+        CURL *curl;
+        CURLcode res;
+
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+        curl = curl_easy_init();
+        if(curl){
+                // Add the url
+                curl_easy_setopt(curl, CURLOPT_URL, e);
+                // Skip cert check
+                curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+                // Ignore if cert has a different HostName
+                curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+                // Send what is recieved to function
+                curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, parse_download);
+
+                // Download the file
+                res = curl_easy_perform(curl);
+                if(res != CURLE_OK){
+                        printf("Failed to download the file %d", res);
+                        return 1;
+                }
+                curl_easy_cleanup(curl);
+        }
+        curl_global_cleanup();
+
+        return 0;
+}
+// Parse what was downloaded
+int parse_download(char *buff, size_t size, size_t nmemb){
+        FILE *tmpf;
+        int i=0;
+        int rc=0;
+        tmpf = fopen(TMPLOCATION, "a");
+        for(i=0;i<nmemb;i++){
+                rc = fputc(buff[i], tmpf);
+                if(rc == EOF)
+                        break;
+                rc = i +1;
+        }
+        fclose(tmpf);
+        return nmemb;
 }
