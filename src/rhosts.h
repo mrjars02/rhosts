@@ -17,6 +17,7 @@
 #define TMPDOWNLOADLOCATION "/tmp/rhostsdownload"
 #define HOSTSLOCATION "/etc/hosts"
 #define CONFIGFILE "/etc/rhosts/rhosts.cfg"
+#define MAXSTRSIZE 500
 #else
 #endif
 
@@ -29,7 +30,7 @@
 
 struct entry{
         int entrytype;
-        char entry[500];
+        char entry[MAXSTRSIZE];
 };
 
 int parse_config(struct entry **entries);

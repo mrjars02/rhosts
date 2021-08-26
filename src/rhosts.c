@@ -37,7 +37,7 @@ int parse_config(struct entry **entries){
         j = &(*entries)[0].entrytype;
 
         char c='\0'; // Character Buffer
-        char buff[500];
+        char buff[MAXSTRSIZE];
         buff[0]='\0';
         short int valtyp = CONTENTTYPE_BLANK;
 
