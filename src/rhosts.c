@@ -120,6 +120,20 @@ int preserve_static_entries(){
                 fclose(hostsf);
                 return 1;
         }
+        char buff[MAXSTRSIZE];
+        char c = EOF;
+        int rc = 0;
+
+        do{
+                c = fgetc(hostsf);
+                printf("%c",c);
+                strncat(buff, &c, 1);
+                if (strncmp(buff, "# rhosts begin", 14) == 0){c = EOF;}
+                if (c == '\n'){
+                        rc = fputs(buff, tmpf);
+                        buff[0] = '\0';
+                }
+        }while ( c != EOF);
 
         
         
