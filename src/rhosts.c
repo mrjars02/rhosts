@@ -36,21 +36,27 @@ int main(int argc, char *argv[]){
 }
 
 
+// Take the address of a struct entry pointer and returns it filled with
+// entries from the config file
 int parse_config(struct entry **entries){
         int rc=0;
+
         FILE *configfile;
         configfile = fopen(CONFIGFILE, "r+");
         if (configfile == NULL){return 1;}
+        
         *entries = malloc(sizeof(struct entry));
         if (entries == NULL){return 1;}
         entries[0]->entrytype = 0;
-        char c='\0';
+        int *j = NULL; // A shorter reference to how many entries
+        j = &(*entries)[0].entrytype;
+
+        char c='\0'; // Character Buffer
         char buff[500];
         buff[0]='\0';
         short int valtyp = CONTENTTYPE_BLANK;
-        int *j = NULL;
-        j = &(*entries)[0].entrytype; // Used to make easier to read
 
+        // Loop through config file
         do{
                 c = fgetc(configfile);
                 // Detect if a comment
@@ -80,18 +86,14 @@ int parse_config(struct entry **entries){
                         buff[0] = '\0';
                         valtyp = CONTENTTYPE_BLANK;
                 } 
-                else if (c == '\n' || c == EOF){ // Clear blank lines
+                // Remove Blank Lines
+                else if (c == '\n' || c == EOF){
                         buff[0] = '\0';
                 }
                 else{
                         strncat(buff, &c, 1);
                 }
         }while (c != EOF);
-//        int k = 1;
-//        for (k=1;k<*j;k++){
-//                printf("%d - %s\n",(*entries)[k].entrytype,\
-//                                (*entries)[k].entry);
-//        }
 
         rc = fclose(configfile);
         if (rc != 0){return 1;}
@@ -114,6 +116,7 @@ int openfile(FILE **file, char *mode, char *location){
         }
         return 0;
 }
+// Recieves a string and returns a content type
 short int determine_config_entry_value(char *buff){
         if (strncmp(buff,"#", 1) == 0){return CONTENTTYPE_COMMENT;}
         else if (strcmp(buff,"site") == 0){return CONTENTTYPE_SITE;}
