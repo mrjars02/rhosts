@@ -3,7 +3,7 @@
 #define RHOSTS_HEADER
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <errno.h>
 #ifdef _WIN64
 #define TMPLOCATION "/tmp/rhosts"
@@ -37,4 +37,5 @@ int parse_config(struct entry **entries);
 int openfile(FILE **file, char *mode, char *location);
 int closefile(FILE **file, char *location);
 short int determine_config_entry_value(char *buff);
+int preserve_static_entries();
 #endif
