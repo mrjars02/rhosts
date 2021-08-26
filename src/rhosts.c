@@ -136,10 +136,21 @@ int preserve_static_entries(){
                 if (strncmp(buff, "# rhosts begin", 14) == 0){c = EOF;}
                 if (c == '\n'){
                         rc = fputs(buff, tmpf);
+                        if (rc == EOF){
+                                fclose(hostsf);
+                                fclose(tmpf);
+                                return 1;
+                        }
                         printf("%s",buff);
                         buff[0] = '\0';
                 }
         }while ( c != EOF);
+        rc = fputs("# rhosts begin\n", tmpf);
+        if (rc == EOF){
+                fclose(hostsf);
+                fclose(tmpf);
+                return 1;
+        }
 
         
         
