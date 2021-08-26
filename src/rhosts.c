@@ -163,10 +163,36 @@ int preserve_static_entries(){
 int download_entries(struct entry **entries){
         printf("Downloading of entries is currently unavailable\n");
         int i = (*entries)[0].entrytype;
+        int rc = 0;
+        FILE *tmpf;
+        tmpf = fopen(TMPLOCATION,"a");
+        if (tmpf == NULL){
+                return 1;
+        }
+        FILE *tmpdf;
+        tmpdf = fopen(TMPDOWNLOADLOCATION,"w+");
+        if (tmpdf == NULL){
+                printf("Failed to open %s\n",TMPDOWNLOADLOCATION);
+                fclose(tmpf);
+                return 1;
+        }
+
+
         for (;i >0 ; i--){
                 if ((*entries)[i].entrytype == CONTENTTYPE_DOWNLOAD){
                         printf("Download: %s\n",(*entries)[i].entry);
+                        rc = fprintf(tmpf, "# rhosts download - %s", \
+                                        (*entries)[i].entry);
+                        if (rc == EOF){
+                                printf("Failed to write to %s\n", \
+                                                TMPDOWNLOADLOCATION);
+                                fclose(tmpdf);
+                                fclose(tmpf);
+                                return 1;
+                        }
+                        // Here is where the download func should be called
                 }
         }
+        remove(TMPDOWNLOADLOCATION);
         return 0;
 }
