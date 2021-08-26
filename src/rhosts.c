@@ -17,8 +17,16 @@ int main(int argc, char *argv[]){
         rc = openfile(&downloadfile, "w+", TMPDOWNLOADLOCATION);
         if (rc != 0){return rc;}
 
-        parse_config(&entries);
+        rc = parse_config(&entries);
+        if (rc != 0){
+                printf("%d - parse_config failed",rc);
+                return rc;
+        }
         rc = preserve_static_entries();
+        if (rc != 0){
+                printf("%d - preserve_static_entries failed",rc);
+                return rc;
+        }
 
 
         // Closing files before exiting
