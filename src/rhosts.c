@@ -79,8 +79,8 @@ int parse_config(struct entry **entries){
                 else if ((c == '\n' || c == EOF) \
                                 && valtyp != CONTENTTYPE_BLANK){
                         (*entries)[0].entrytype++;
-                        *entries = (struct entry *)reallocarray(*entries,\
-                                        (*j + 1), sizeof(struct entry));
+                        *entries = (struct entry *)realloc(*entries,\
+                                        (*j + 1) * sizeof(struct entry));
                         if (*entries == NULL){return 1;}
                         j = &(*entries)[0].entrytype;
                         (*entries)[*j].entrytype=valtyp;
