@@ -259,7 +259,9 @@ int download_libcurl(char *e){
                 // Download the file
                 res = curl_easy_perform(curl);
                 if(res != CURLE_OK){
-                        printf("Failed to download the file %d", res);
+                        printf("Failed to download the file: %d\n", res);
+                        fflush(stdin);
+                        copy_old_download(e);
                         return 1;
                 }
                 curl_easy_cleanup(curl);
@@ -282,4 +284,52 @@ int parse_download(char *buff, size_t size, size_t nmemb){
         }
         fclose(tmpf);
         return nmemb;
+}
+// Checks the hosts file for a download section matching the url
+// then copies it to the tmp file
+int copy_old_download(char *url){
+        FILE *hostsf;
+        FILE *tmpf;
+        hostsf = fopen(HOSTSLOCATION, "r");
+        if (hostsf == NULL){return 1;}
+        tmpf = fopen(TMPLOCATION,"a");
+        if (tmpf == NULL){
+                fclose(hostsf);
+                return 1;
+        }
+        char buff[MAXSTRSIZE] = "";
+        char search[MAXSTRSIZE] = "# rhosts download - ";
+        strncat(search,url,MAXSTRSIZE - 21);
+        char c = '\0';
+
+        do{
+                c = fgetc(hostsf);
+                while(c != '\n' && c != EOF && strlen(buff) < MAXSTRSIZE){
+                        strncat(buff, &c, 1);
+                        c = fgetc(hostsf);
+                }
+                strncat(buff, &c, 1);
+                if(strncmp(buff,search, strlen(search)) == 0){
+                        printf("Found a local match for %s\n",url);
+                        c = EOF;
+                }
+                buff[0] = '\0';
+        }while(c !=EOF);
+        do{
+                do{
+                        c = fgetc(hostsf);
+                        if (c != EOF)
+                                strncat(buff, &c, 1);
+                } while(c != '\n' && c != EOF && strlen(buff) < MAXSTRSIZE);
+                if(strncmp(buff,"# rhosts", 8) != 0){
+                        fputs(buff, tmpf);
+                }
+                else
+                        c = EOF;
+                buff[0] = '\0';
+        }while(c !=EOF);
+
+        fclose(hostsf);
+        fclose(tmpf);
+        return 0;
 }
