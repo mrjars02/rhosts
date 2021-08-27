@@ -27,6 +27,11 @@ int main(int argc, char *argv[]){
                 printf("%d - download_entries failed",rc);
                 return rc;
         }
+        rc = copy_tmp_to_hosts();
+        if (rc != 0){
+                printf("%d - failed to copy to hosts file",rc);
+                return rc;
+        }
         return 0;
 }
 
@@ -331,5 +336,26 @@ int copy_old_download(char *url){
 
         fclose(hostsf);
         fclose(tmpf);
+        return 0;
+}
+// Copies the contents of the temp file to the hosts file
+int copy_tmp_to_hosts(){
+        FILE *tmpf;
+        tmpf = fopen(TMPLOCATION,"r");
+        if (tmpf == NULL)
+                return 1;
+        FILE *hostsf;
+        hostsf = fopen(HOSTSLOCATION, "w");
+        if (hostsf == NULL){
+                printf("Failed to open %s\n",HOSTSLOCATION);
+                fclose(tmpf);
+                return 1;
+        }
+        char c;
+
+        for(c = fgetc(tmpf);c != EOF;c = fgetc(tmpf)){
+                fputc(c,hostsf);
+        }
+        remove(TMPLOCATION);
         return 0;
 }
