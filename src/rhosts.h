@@ -1,11 +1,11 @@
-#ifndef RHOSTS_HEADER
 
+#ifndef RHOSTS_HEADER
 #define RHOSTS_HEADER
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <curl/curl.h>
 
 #ifdef _WIN64
 #define TMPLOCATION "/tmp/rhosts"
@@ -19,10 +19,11 @@
 #define TMPDOWNLOADLOCATION "/tmp/rhostsdownload"
 #define HOSTSLOCATION "/etc/hosts"
 #define CONFIGFILE "/etc/rhosts/rhosts.cfg"
-#define MAXSTRSIZE 500
 #else
 #endif
 
+#define STRUCTS_HEADER
+#define MAXSTRSIZE 500
 // entry types
 #define CONTENTTYPE_ERROR 5
 #define CONTENTTYPE_BLANK 0
@@ -41,10 +42,9 @@ int openfile(FILE **file, char *mode, char *location);
 int closefile(FILE **file, char *location);
 short int determine_config_entry_value(char *buff);
 int preserve_static_entries();
-int download_entries(struct entry **entries);
 int add_site_entries(struct entry **entries);
-int download_libcurl(char *e);
-int parse_download(char *buff, size_t size, size_t nmemb);
-int copy_old_download(char *url);
 int copy_tmp_to_hosts();
+#endif
+#ifndef DOWNLOAD_HEADER
+#include "download.h"
 #endif
