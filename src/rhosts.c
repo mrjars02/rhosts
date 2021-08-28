@@ -23,7 +23,6 @@
 #include "rhosts.h"
 #endif
 
-
 int main(int argc, char *argv[]){
         struct entry *entries;
         int rc =0;
@@ -56,10 +55,6 @@ int main(int argc, char *argv[]){
         }
         return 0;
 }
-
-
-// Take the address of a struct entry pointer and returns it filled with
-// entries from the config file
 int parse_config(struct entry **entries){
         int rc=0;
 
@@ -73,7 +68,7 @@ int parse_config(struct entry **entries){
         int *j = NULL; // A shorter reference to how many entries
         j = &(*entries)[0].entrytype;
 
-        char c='\0'; // Character Buffer
+        char c='\0';
         char buff[MAXSTRSIZE];
         buff[0]='\0';
         short int valtyp = CONTENTTYPE_BLANK;
@@ -108,7 +103,6 @@ int parse_config(struct entry **entries){
                         buff[0] = '\0';
                         valtyp = CONTENTTYPE_BLANK;
                 } 
-                // Remove Blank Lines
                 else if (c == '\n' || c == EOF){
                         buff[0] = '\0';
                 }
@@ -138,15 +132,12 @@ int openfile(FILE **file, char *mode, char *location){
         }
         return 0;
 }
-// Recieves a string and returns a content type
 short int determine_config_entry_value(char *buff){
         if (strncmp(buff,"#", 1) == 0){return CONTENTTYPE_COMMENT;}
         else if (strcmp(buff,"site") == 0){return CONTENTTYPE_SITE;}
         else if (strcmp(buff,"download") == 0){return CONTENTTYPE_DOWNLOAD;}
         else {return CONTENTTYPE_ERROR;}
 }
-
-// Copies the beginning of the hosts file to tmpfile
 int preserve_static_entries(){
         FILE *hostsf;
         FILE *tmpf;
@@ -190,7 +181,6 @@ int preserve_static_entries(){
         fclose(tmpf);
         return 0;
 }
-
 int add_site_entries(struct entry **entries){
         int i = (*entries)[0].entrytype;
         int rc = 0;
@@ -226,7 +216,6 @@ int add_site_entries(struct entry **entries){
         fclose(tmpf);
         return 0;
 }
-// Copies the contents of the temp file to the hosts file
 int copy_tmp_to_hosts(){
         FILE *tmpf;
         tmpf = fopen(TMPLOCATION,"r");

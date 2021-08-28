@@ -22,7 +22,6 @@
 #include "download.h"
 #endif
 
-// This will download entries from the config
 int download_entries(struct entry **entries){
         int i = (*entries)[0].entrytype;
         int rc = 0;
@@ -62,7 +61,6 @@ int download_entries(struct entry **entries){
         remove(TMPDOWNLOADLOCATION);
         return 0;
 }
-// Uses libcurl to download and add file to tmpf
 int download_libcurl(char *e){
         CURL *curl;
         CURLcode res;
@@ -93,7 +91,6 @@ int download_libcurl(char *e){
 
         return 0;
 }
-// Parse what was downloaded
 int parse_download(char *buff, size_t size, size_t nmemb){
         FILE *tmpf;
         int i=0;
@@ -108,8 +105,6 @@ int parse_download(char *buff, size_t size, size_t nmemb){
         fclose(tmpf);
         return nmemb;
 }
-// Checks the hosts file for a download section matching the url
-// then copies it to the tmp file
 int copy_old_download(char *url){
         FILE *hostsf;
         FILE *tmpf;
