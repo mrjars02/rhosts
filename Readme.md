@@ -8,6 +8,8 @@ This reroutes sites to 0.0.0.0 in order to block them from being reached by addi
 
 - libcurl4-gnutls-dev
 
+- libclogs
+
 ## Install
 
         sudo make install

@@ -28,34 +28,40 @@ int main(int argc, char *argv[]){
         int rc =0;
 
 
+        clogs_init_config(CLOGS_TIMESTAMP | CLOGS_USELOGFILE, \
+                        "/var/log/rhosts.log", CLOGS_DEBUG);
+
+        clogs_print(CLOGS_DEBUG,"Initialized settting up logs");
         rc = parse_config(&entries);
         if (rc != 0){
-                printf("%d - parse_config failed",rc);
+                clogs_print(CLOGS_CRITICAL,"Parsing config failed");
                 return rc;
         }
         rc = preserve_static_entries();
         if (rc != 0){
-                printf("%d - preserve_static_entries failed",rc);
+                clogs_print(CLOGS_ERROR, "preserve_static_entries failed");
                 return rc;
         }
         rc = download_entries(&entries);
         if (rc != 0){
-                printf("%d - download_entries failed",rc);
+                clogs_print(CLOGS_ERROR, "download_entries failed");
                 return rc;
         }
         rc = add_site_entries(&entries);
         if (rc != 0){
-                printf("%d - download_entries failed",rc);
+                clogs_print(CLOGS_ERROR, "add_site_entries failed");
                 return rc;
         }
         rc = copy_tmp_to_hosts();
         if (rc != 0){
-                printf("%d - failed to copy to hosts file",rc);
+                printf("%d - ",rc);
+                clogs_print(CLOGS_ERROR, "failed to copy to hosts file");
                 return rc;
         }
         return 0;
 }
 int parse_config(struct entry **entries){
+        clogs_print(CLOGS_DEBUG, "Entered parse_config");
         int rc=0;
 
         FILE *configfile;
@@ -116,29 +122,32 @@ int parse_config(struct entry **entries){
         return 0;
 }
 int closefile(FILE **file, char *location){
-        int rc = 0;
+        clogs_print(CLOGS_DEBUG, "Entering closefile");int rc = 0;
         rc = fclose(*file);
         if (rc != 0){
-                printf("Failed to open %s\n", location);
+                clogs_print(CLOGS_ERROR, "Failed to close file%s", location);
                 return errno;
         }
         return 0;
 }
 int openfile(FILE **file, char *mode, char *location){
+        clogs_print(CLOGS_DEBUG, "Entering openfile: %s", location);
         *file = fopen(location, mode);
         if (*file == NULL){
-                printf("Failed to open %s\n", location);
+                clogs_print(CLOGS_ERROR, "Failed to open %s", location);
                 return errno;
         }
         return 0;
 }
 short int determine_config_entry_value(char *buff){
+        clogs_print(CLOGS_DEBUG, "Entering determine_config_entry");
         if (strncmp(buff,"#", 1) == 0){return CONTENTTYPE_COMMENT;}
         else if (strcmp(buff,"site") == 0){return CONTENTTYPE_SITE;}
         else if (strcmp(buff,"download") == 0){return CONTENTTYPE_DOWNLOAD;}
         else {return CONTENTTYPE_ERROR;}
 }
 int preserve_static_entries(){
+        clogs_print(CLOGS_DEBUG, "Entering preserve_static_entries");
         FILE *hostsf;
         FILE *tmpf;
         hostsf = fopen(HOSTSLOCATION, "r");
@@ -182,6 +191,7 @@ int preserve_static_entries(){
         return 0;
 }
 int add_site_entries(struct entry **entries){
+        clogs_print(CLOGS_DEBUG, "Entering add_site_entries");
         int i = (*entries)[0].entrytype;
         int rc = 0;
         FILE *tmpf;
@@ -217,6 +227,7 @@ int add_site_entries(struct entry **entries){
         return 0;
 }
 int copy_tmp_to_hosts(){
+        clogs_print(CLOGS_DEBUG, "Entering copy_tmp_to_hosts");
         FILE *tmpf;
         tmpf = fopen(TMPLOCATION,"r");
         if (tmpf == NULL)

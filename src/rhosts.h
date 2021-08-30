@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <stdint.h>
+#include <libclogs.h>
 
 #ifdef _WIN64
 #define TMPLOCATION "/tmp/rhosts"
