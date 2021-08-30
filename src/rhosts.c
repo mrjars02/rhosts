@@ -161,7 +161,6 @@ int preserve_static_entries(){
         char c = EOF;
         int rc = 0;
 
-        printf("Static hosts are:\n");
         do{
                 c = fgetc(hostsf);
                 strncat(buff, &c, 1);
@@ -173,7 +172,6 @@ int preserve_static_entries(){
                                 fclose(tmpf);
                                 return 1;
                         }
-                        printf("%s",buff);
                         buff[0] = '\0';
                 }
         }while ( c != EOF);
@@ -203,7 +201,8 @@ int add_site_entries(struct entry **entries){
 
         rc = fputs("# rhosts - static begin\n", tmpf);
         if (rc == EOF){
-                printf("Failed to write to tmp file\n");
+                clogs_print(CLOGS_ERROR,"Failed to write to tmp file %s\n",\
+                                TMPLOCATION);
                 fclose(tmpf);
                 return 1;
         }
@@ -218,7 +217,8 @@ int add_site_entries(struct entry **entries){
         }
         rc = fputs("# rhosts - static end\n# rhosts end\n", tmpf);
         if (rc == EOF){
-                printf("Failed to write to tmp file\n");
+                clogs_print(CLOGS_ERROR,"Failed to write to tmp file %s\n", \
+                                TMPLOCATION);
                 fclose(tmpf);
                 return 1;
         }
@@ -235,7 +235,7 @@ int copy_tmp_to_hosts(){
         FILE *hostsf;
         hostsf = fopen(HOSTSLOCATION, "w");
         if (hostsf == NULL){
-                printf("Failed to open %s\n",HOSTSLOCATION);
+                clogs_print(CLOGS_ERROR,"Failed to open %s\n",HOSTSLOCATION);
                 fclose(tmpf);
                 return 1;
         }
