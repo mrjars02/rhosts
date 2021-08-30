@@ -256,7 +256,7 @@ int copy_tmp_to_hosts(){
 int consume_args(struct config *config, int argc, char **argv){
         int i=0;
         for (i=1;i < argc;i++){
-                if (strcmp(argv[i], "-d") == 0)
+                if (strcmp(argv[i], "--debug") == 0)
                                 config->loglevel = CLOGS_DEBUG;
         }
         return 0;
