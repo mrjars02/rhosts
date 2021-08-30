@@ -23,13 +23,19 @@
 #include "rhosts.h"
 #endif
 
+
+
+
 int main(int argc, char *argv[]){
         struct entry *entries;
+        struct config config;
+        config.loglevel = CLOGS_WARNING;
         int rc =0;
-
-
+        if (argc >1){
+                consume_args(&config, argc, argv);
+        }
         clogs_init_config(CLOGS_TIMESTAMP | CLOGS_USELOGFILE, \
-                        "/var/log/rhosts.log", CLOGS_DEBUG);
+                        "/var/log/rhosts.log", config.loglevel);
 
         clogs_print(CLOGS_DEBUG,"Initialized settting up logs");
         rc = parse_config(&entries);
@@ -245,5 +251,13 @@ int copy_tmp_to_hosts(){
                 fputc(c,hostsf);
         }
         remove(TMPLOCATION);
+        return 0;
+}
+int consume_args(struct config *config, int argc, char **argv){
+        int i=0;
+        for (i=1;i < argc;i++){
+                if (strcmp(argv[i], "-d") == 0)
+                                config->loglevel = CLOGS_DEBUG;
+        }
         return 0;
 }
