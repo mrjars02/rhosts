@@ -22,6 +22,9 @@
 #include "download.h"
 #endif
 
+int clean_download();
+int skip_to_next_line(FILE **fp);
+
 int download_entries(struct entry **entries){
         int i = (*entries)[0].entrytype;
         int rc = 0;
@@ -47,7 +50,7 @@ int download_entries(struct entry **entries){
                         fflush(tmpf);
                         if (rc == EOF){
                                 printf("Failed to write to %s\n", \
-                                                TMPDOWNLOADLOCATION);
+                                                TMPLOCATION);
                                 fclose(tmpdf);
                                 fclose(tmpf);
                                 return 1;
@@ -85,24 +88,26 @@ int download_libcurl(char *e){
                         copy_old_download(e);
                         return 1;
                 }
+                        clean_download();
                 curl_easy_cleanup(curl);
         }
         curl_global_cleanup();
+        remove(TMPDOWNLOADLOCATION);
 
         return 0;
 }
 int parse_download(char *buff, size_t size, size_t nmemb){
-        FILE *tmpf;
+        FILE *tmpdf;
         int i=0;
         int rc=0;
-        tmpf = fopen(TMPLOCATION, "a");
+        tmpdf = fopen(TMPDOWNLOADLOCATION, "a");
         for(i=0;i<nmemb;i++){
-                rc = fputc(buff[i], tmpf);
+                rc = fputc(buff[i], tmpdf);
                 if(rc == EOF)
                         break;
                 rc = i +1;
         }
-        fclose(tmpf);
+        fclose(tmpdf);
         return nmemb;
 }
 int copy_old_download(char *url){
@@ -149,5 +154,57 @@ int copy_old_download(char *url){
 
         fclose(hostsf);
         fclose(tmpf);
+        return 0;
+}
+int clean_download(){
+        FILE *tmpdf;
+        tmpdf = fopen(TMPDOWNLOADLOCATION, "r+");
+        if (tmpdf == NULL){
+                printf("Failed to open %s\n", TMPDOWNLOADLOCATION);
+                return 1;
+        }
+        FILE *tmpf;
+        tmpf = fopen(TMPLOCATION, "a");
+        if (tmpf == NULL){
+                printf("Failed to open %s\n", TMPLOCATION);
+                return 1;
+        }
+        char c;
+        char buff[MAXSTRSIZE];
+        int buffsize=1;
+        buff[0] = '\0';
+
+        do{
+                c = fgetc(tmpdf);
+                buffsize++;
+                if (buffsize > MAXSTRSIZE){
+                        printf("String too long when cleaning download: %s\n",buff);
+                        return 1;
+                }
+                if (c!=EOF) // Later needs to check for NULL
+                        strncat(buff,&c,1);
+               if (buffsize==2){
+                       if (buff[0]=='#' || buff[0]=='\n'){
+                               skip_to_next_line(&tmpdf);
+                               buff[0] = '\0';
+                               buffsize=1;
+                       }
+               }
+               if (c == '\n' || c == EOF){
+                       fputs(buff,tmpf);
+                       buff[0]='\0';
+                       buffsize=1;
+               }
+        }while (c!=EOF);
+        fflush(tmpf);
+        fclose(tmpf);
+        fclose(tmpdf);
+        return 0;
+}
+int skip_to_next_line(FILE **fp){
+        char c;
+        do{
+                c = fgetc(*fp);
+        }while(c != '\n' && c != EOF);
         return 0;
 }
