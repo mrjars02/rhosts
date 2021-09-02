@@ -115,23 +115,6 @@ int parse_config(struct entry **entries){
         if (rc != 0){return 1;}
         return 0;
 }
-int closefile(FILE **file, char *location){
-        int rc = 0;
-        rc = fclose(*file);
-        if (rc != 0){
-                printf("Failed to open %s\n", location);
-                return errno;
-        }
-        return 0;
-}
-int openfile(FILE **file, char *mode, char *location){
-        *file = fopen(location, mode);
-        if (*file == NULL){
-                printf("Failed to open %s\n", location);
-                return errno;
-        }
-        return 0;
-}
 short int determine_config_entry_value(char *buff){
         if (strncmp(buff,"#", 1) == 0){return CONTENTTYPE_COMMENT;}
         else if (strcmp(buff,"site") == 0){return CONTENTTYPE_SITE;}

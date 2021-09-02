@@ -57,8 +57,6 @@ struct entry{
 
 int parse_config(struct entry **entries);
 
-int openfile(FILE **file, char *mode, char *location);
-int closefile(FILE **file, char *location);
 short int determine_config_entry_value(char *buff);
 int preserve_static_entries();
 int add_site_entries(struct entry **entries);
