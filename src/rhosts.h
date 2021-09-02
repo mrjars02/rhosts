@@ -25,8 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <stdint.h>
-#include <libclogs.h>
 
 #ifdef _WIN64
 #define TMPLOCATION "/tmp/rhosts"
@@ -56,9 +54,6 @@ struct entry{
         int entrytype;
         char entry[MAXSTRSIZE];
 };
-struct config{
-        uint8_t loglevel;
-};
 
 int parse_config(struct entry **entries);
 
@@ -68,7 +63,6 @@ short int determine_config_entry_value(char *buff);
 int preserve_static_entries();
 int add_site_entries(struct entry **entries);
 int copy_tmp_to_hosts();
-int consume_args(struct config *config, int argc, char **argv);
 #endif
 #ifndef DOWNLOAD_HEADER
 #include "download.h"

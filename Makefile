@@ -3,7 +3,7 @@ dir:
 	if [ ! -d /etc/rhosts ];then mkdir /etc/rhosts;else echo "/etc/rhosts already exists";fi
 	if [ ! -d build ];then mkdir build;else echo "build already exists";fi
 build: dir
-	gcc src/rhosts.c src/download.c -lcurl -lclogs -o build/rhosts
+	gcc src/rhosts.c src/download.c -lcurl -o build/rhosts
 clean:
 	- rm -rf build
 install: build
