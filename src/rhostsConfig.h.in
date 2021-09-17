@@ -1,0 +1,2 @@
+// the configured options and settings for Tutorial
+#define rhosts_VERSION "@rhosts_VERSION@"

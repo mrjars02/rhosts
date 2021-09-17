@@ -21,6 +21,8 @@
 #ifndef RHOSTS_HEADER
 #define RHOSTS_HEADER
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

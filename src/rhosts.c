@@ -27,6 +27,7 @@ int main(int argc, char *argv[]){
         struct entry *entries;
         int rc =0;
 
+        printf("version: %s\n",rhosts_VERSION);
 
         rc = parse_config(&entries);
         if (rc != 0){
