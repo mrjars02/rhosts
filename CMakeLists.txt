@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.10)
+project(rhosts VERSION 0.0.0 LANGUAGES C)
+message("  C: '${CMAKE_C_COMPILER}'")
+include_directories(${PROJECT_SOURCE_DIR})
+add_executable(rhosts src/rhosts.c src/rhosts.h src/download.h src/download.c)
+target_link_libraries(rhosts curl)
