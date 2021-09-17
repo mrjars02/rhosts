@@ -2,28 +2,6 @@
 
 This reroutes sites to 0.0.0.0 in order to block them from being reached by adding them automatically to the hosts file.   
 
-## Requirements to install and run
-
-### Linux
-
-- gcc
-
-- make
-
-- libcurl4-gnutls-dev
-
-## Install
-
-### Linux
-
-        sudo make install
-
-## Update
-
-### Linux
-
-        sudo make reinstall
-
 ## How to use
 
 Open the config file:    
