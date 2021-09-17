@@ -70,17 +70,19 @@ int parse_config(struct entry **entries){
         j = &(*entries)[0].entrytype;
 
         char c='\0';
+        int b=0;
         char buff[MAXSTRSIZE];
         buff[0]='\0';
         short int valtyp = CONTENTTYPE_BLANK;
 
         // Loop through config file
         do{
-                c = fgetc(configfile);
+                b = fgetc(configfile);
+                c = (char)b;
                 // Detect if a comment
                 if (strncmp(buff, "#",(long unsigned int)1) == 0 && \
                                 valtyp == CONTENTTYPE_BLANK){
-                        while (c != '\n' && c != EOF){c =fgetc(configfile);}
+                        while (c != '\n' && b != EOF){c =fgetc(configfile);}
                 }
                 // Detect end of value type string
                 if (c == '=' && valtyp == CONTENTTYPE_BLANK){
@@ -92,7 +94,7 @@ int parse_config(struct entry **entries){
                 }
 
                 // Detect end of entry
-                else if ((c == '\n' || c == EOF) \
+                else if ((c == '\n' || b == EOF) \
                                 && valtyp != CONTENTTYPE_BLANK){
                         (*entries)[0].entrytype++;
                         *entries = (struct entry *)realloc(*entries,\
@@ -104,13 +106,13 @@ int parse_config(struct entry **entries){
                         buff[0] = '\0';
                         valtyp = CONTENTTYPE_BLANK;
                 } 
-                else if (c == '\n' || c == EOF){
+                else if (c == '\n' || b == EOF){
                         buff[0] = '\0';
                 }
                 else{
                         strncat(buff, &c, 1);
                 }
-        }while (c != EOF);
+        }while (b != EOF);
 
         rc = fclose(configfile);
         if (rc != 0){return 1;}
@@ -134,13 +136,15 @@ int preserve_static_entries(){
         }
         char buff[MAXSTRSIZE];
         char c = EOF;
+        int b = 0;
         int rc = 0;
 
         printf("Static hosts are:\n");
         do{
-                c = fgetc(hostsf);
+                b = fgetc(hostsf);
+                c = (char)b;
                 strncat(buff, &c, 1);
-                if (strncmp(buff, "# rhosts begin", 14) == 0){c = EOF;}
+                if (strncmp(buff, "# rhosts begin", 14) == 0){b = EOF;}
                 if (c == '\n'){
                         rc = fputs(buff, tmpf);
                         if (rc == EOF){
@@ -151,7 +155,7 @@ int preserve_static_entries(){
                         printf("%s",buff);
                         buff[0] = '\0';
                 }
-        }while ( c != EOF);
+        }while ( b != EOF);
         rc = fputs("# rhosts begin\n", tmpf);
         if (rc == EOF){
                 fclose(hostsf);
@@ -212,10 +216,10 @@ int copy_tmp_to_hosts(){
                 fclose(tmpf);
                 return 1;
         }
-        char c;
+        int b;
 
-        for(c = fgetc(tmpf);c != EOF;c = fgetc(tmpf)){
-                fputc(c,hostsf);
+        for(b = fgetc(tmpf);b != EOF;b = fgetc(tmpf)){
+                fputc((char)b,hostsf);
         }
         remove(TMPLOCATION);
         return 0;

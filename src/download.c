@@ -124,33 +124,37 @@ int copy_old_download(char *url){
         char search[MAXSTRSIZE] = "# rhosts download - ";
         strncat(search,url,MAXSTRSIZE - 21);
         char c = '\0';
+        int b =0;
 
         do{
-                c = fgetc(hostsf);
-                while(c != '\n' && c != EOF && strlen(buff) < MAXSTRSIZE){
+                b = fgetc(hostsf);
+                c = (char)b;
+                while(c != '\n' && b != EOF && strlen(buff) < MAXSTRSIZE){
                         strncat(buff, &c, 1);
-                        c = fgetc(hostsf);
+                        b = fgetc(hostsf);
+                        c = (char)b;
                 }
                 strncat(buff, &c, 1);
                 if(strncmp(buff,search, strlen(search)) == 0){
                         printf("Found a local match for %s\n",url);
-                        c = EOF;
+                        b = EOF;
                 }
                 buff[0] = '\0';
-        }while(c !=EOF);
+        }while(b !=EOF);
         do{
                 do{
-                        c = fgetc(hostsf);
-                        if (c != EOF)
+                        b = fgetc(hostsf);
+                        c = (char)b;
+                        if (b != EOF)
                                 strncat(buff, &c, 1);
-                } while(c != '\n' && c != EOF && strlen(buff) < MAXSTRSIZE);
+                } while(c != '\n' && b != EOF && strlen(buff) < MAXSTRSIZE);
                 if(strncmp(buff,"# rhosts", 8) != 0){
                         fputs(buff, tmpf);
                 }
                 else
-                        c = EOF;
+                        b = EOF;
                 buff[0] = '\0';
-        }while(c !=EOF);
+        }while(b !=EOF);
 
         fclose(hostsf);
         fclose(tmpf);
@@ -170,18 +174,20 @@ int clean_download(){
                 return 1;
         }
         char c;
+        int b;
         char buff[MAXSTRSIZE];
         int buffsize=1;
         buff[0] = '\0';
 
         do{
-                c = fgetc(tmpdf);
+                b = fgetc(tmpdf);
+                c = (char)b;
                 buffsize++;
                 if (buffsize > MAXSTRSIZE){
                         printf("String too long when cleaning download: %s\n",buff);
                         return 1;
                 }
-                if (c!=EOF) // Later needs to check for NULL
+                if (b!=EOF) // Later needs to check for NULL
                         strncat(buff,&c,1);
                if (buffsize==2){
                        if (buff[0]=='#' || buff[0]=='\n'){
@@ -190,12 +196,12 @@ int clean_download(){
                                buffsize=1;
                        }
                }
-               if (c == '\n' || c == EOF){
+               if (c == '\n' || b == EOF){
                        fputs(buff,tmpf);
                        buff[0]='\0';
                        buffsize=1;
                }
-        }while (c!=EOF);
+        }while (b!=EOF);
         fflush(tmpf);
         fclose(tmpf);
         fclose(tmpdf);
@@ -203,8 +209,10 @@ int clean_download(){
 }
 int skip_to_next_line(FILE **fp){
         char c;
+        int b;
         do{
-                c = fgetc(*fp);
-        }while(c != '\n' && c != EOF);
+                b = fgetc(*fp);
+                c = (char)b;
+        }while(c != '\n' && b != EOF);
         return 0;
 }
