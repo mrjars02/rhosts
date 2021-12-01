@@ -18,4 +18,34 @@
  */
 
 
-/* rhosts - Program used to maintain a blocklist within a hostfile */
+// rhosts - Program used to maintain a blocklist within a hostfile
+package main
+
+import (
+	"runtime"
+	"fmt"
+	"os"
+)
+
+func main() {
+	// Detect which OS is running
+	switch runtime.GOOS {
+	case "windows":
+		fmt.Println("Windows is currently unsupported")
+		os.Exit(1)
+		//tmpdir := "C:\\tmp"
+		//hostsloc := "C:\\Windows\\System32\\drivers\\etc\\hosts"
+	case "linux":
+		tmpdir := "/tmp/"
+		hostsloc := "/etc/hosts"
+		cfgloc :="/etc/rhosts/rhosts.cfg"
+		fmt.Println("linux:",tmpdir,hostsloc,cfgloc)
+	case "ios":
+		fmt.Println("ios")
+	default:
+		fmt.Println(runtime.GOOS," is not supported")
+		os.Exit(1)
+	}
+
+	// Parse Config
+}
