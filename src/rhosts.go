@@ -25,10 +25,15 @@ import (
 	"runtime"
 	"fmt"
 	"os"
+	"bufio"
+	"log"
 )
 
 func main() {
 	// Detect which OS is running
+		//tmpdir := ""
+		//hostsloc := ""
+		cfgloc := ""
 	switch runtime.GOOS {
 	case "windows":
 		fmt.Println("Windows is currently unsupported")
@@ -36,16 +41,35 @@ func main() {
 		//tmpdir := "C:\\tmp"
 		//hostsloc := "C:\\Windows\\System32\\drivers\\etc\\hosts"
 	case "linux":
-		tmpdir := "/tmp/"
-		hostsloc := "/etc/hosts"
-		cfgloc :="/etc/rhosts/rhosts.cfg"
-		fmt.Println("linux:",tmpdir,hostsloc,cfgloc)
+		//tmpdir = "/tmp/"
+		//hostsloc = "/etc/hosts"
+		cfgloc ="/etc/rhosts/rhosts.cfg"
 	case "ios":
 		fmt.Println("ios")
+		os.Exit(1)
 	default:
-		fmt.Println(runtime.GOOS," is not supported")
+		log.Print(runtime.GOOS," is not supported")
 		os.Exit(1)
 	}
 
 	// Parse Config
+	log.Print("Opening: ", cfgloc)
+	cfgf, err := os.Open(cfgloc)
+	defer cfgf.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cfgfb := bufio.NewScanner(cfgf)
+	cfgfb.Split(bufio.ScanLines)
+	for res := cfgfb.Scan();res;res = cfgfb.Scan() {
+		fmt.Println(cfgfb.Text())
+	}
+	err = cfgfb.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func cfgparse(buf string) string{
+	return ""
 }
