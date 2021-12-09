@@ -40,7 +40,7 @@ func main() {
 	sites, downloads := cfgparse(cfgloc)
 	log.Print("Sites:\n",sites)
 	log.Print("Downloads:\n",downloads)
-
+	copystatichosts(tmpdir, hostsloc)
 	downloadcontent(downloads, tmpdir)
 	
 }
@@ -135,6 +135,38 @@ func cfgparseline(buf string) (uint8, string){
 		}
 	}
 	return state, body
+}
+
+func copystatichosts(tmpdir, hostsloc string) error {
+	fileloc := tmpdir + "rhosts"
+	file, err := os.Create(fileloc)
+	defer file.Close()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	filer, err := os.Open(hostsloc)
+	defer filer.Close()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	filebuf := bufio.NewScanner(filer)
+	filebuf.Split(bufio.ScanLines)
+	for res := filebuf.Scan();res;res = filebuf.Scan() {
+		buff := filebuf.Text()
+		if (buff == "# rhosts begin"){
+			break
+		}
+		_,err := file.WriteString(buff + "\n")
+		if (err != nil) {
+			log.Print(err)
+			return err
+		}
+	}
+	_,err = file.WriteString("# rhosts begin\n")
+	err = filebuf.Err()
+	return err
 }
 
 func downloadcontent(downloads []string, tmpdir string) {
