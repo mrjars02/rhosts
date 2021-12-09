@@ -42,7 +42,7 @@ func main() {
 	log.Print("Downloads:\n",downloads)
 	copystatichosts(tmpdir, hostsloc)
 	downloadcontent(downloads, tmpdir)
-	
+	writesites(sites, tmpdir)
 }
 
 func sysdetect (tmpdir, hostsloc, cfgloc *string) {
@@ -199,4 +199,29 @@ func downloadcontent(downloads []string, tmpdir string) {
 			continue
 		}
 	}
+}
+
+func writesites(sites []string, tmpdir string) error {
+	var err error = nil
+	fileloc := tmpdir + "rhosts"
+	log.Print("Opening: " + fileloc)
+	file,err := os.OpenFile(fileloc, os.O_APPEND|os.O_WRONLY, 0644)
+	defer file.Close()
+	if (err != nil) {
+		log.Print(err)
+		return err
+	}
+	_,err = file.WriteString("# rhosts sites\n")
+	if (err != nil){
+		log.Print(err)
+		return err
+	}
+	for _,s := range sites {
+		_,err = file.WriteString(s)
+		if (err != nil){
+			log.Print(err)
+			break
+		}
+	}
+	return err
 }
