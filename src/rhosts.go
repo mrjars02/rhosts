@@ -180,6 +180,10 @@ func downloadcontent(downloads []string, tmpdir string) {
 
 	for _, d := range downloads {
 		log.Print("Downloading: ",d)
+		file.WriteString("# rhosts download - " + d + "\n")
+		if (err != nil) {
+			continue
+		}
 		response, err := http.Get(d)
 		if (err !=nil) {
 			log.Print(err)
@@ -190,5 +194,9 @@ func downloadcontent(downloads []string, tmpdir string) {
 			}
 		}
 		defer response.Body.Close()
+		file.WriteString("\n")
+		if (err != nil) {
+			continue
+		}
 	}
 }
