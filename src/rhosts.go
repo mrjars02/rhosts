@@ -24,8 +24,10 @@ package main
 import (
 	"runtime"
 	"os"
+	"io"
 	"bufio"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -38,6 +40,8 @@ func main() {
 	sites, downloads := cfgparse(cfgloc)
 	log.Print("Sites:\n",sites)
 	log.Print("Downloads:\n",downloads)
+
+	downloadcontent(downloads, tmpdir)
 	
 }
 
@@ -131,4 +135,28 @@ func cfgparseline(buf string) (uint8, string){
 		}
 	}
 	return state, body
+}
+
+func downloadcontent(downloads []string, tmpdir string) {
+	fileloc := tmpdir + "rhostsdown"
+	log.Print("Opening: ", fileloc)
+	file,err := os.Create(fileloc)
+	if (err != nil) {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	for _, d := range downloads {
+		log.Print("Downloading: ",d)
+		response, err := http.Get(d)
+		if (err !=nil) {
+			log.Print(err)
+		}else{
+			_,err := io.Copy(file,response.Body)
+			if (err != nil){
+				log.Print(err)
+			}
+		}
+		defer response.Body.Close()
+	}
 }
