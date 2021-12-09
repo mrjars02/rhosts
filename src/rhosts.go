@@ -35,7 +35,9 @@ func main() {
 
 	sysdetect (&tmpdir, &hostsloc, &cfgloc)
 
-	cfgparse(cfgloc)
+	sites, downloads := cfgparse(cfgloc)
+	log.Print("Sites:\n",sites)
+	log.Print("Downloads:\n",downloads)
 	
 }
 
@@ -57,7 +59,9 @@ func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 	}
 }
 
-func cfgparse (cfgloc string){
+func cfgparse (cfgloc string) ([]string, []string){
+	var downloads []string
+	var sites []string
 	log.Print("Opening: ", cfgloc)
 	file, err := os.Open(cfgloc)
 	defer file.Close()
@@ -68,12 +72,18 @@ func cfgparse (cfgloc string){
 	filebuf.Split(bufio.ScanLines)
 	for res := filebuf.Scan();res;res = filebuf.Scan() {
 		state, body := cfgparseline(filebuf.Text())
-		log.Print(state, body)
+		switch state {
+		case 3:
+			sites =append(sites,body)
+		case 4:
+			downloads = append(downloads,body)
+	}
 	}
 	err = filebuf.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
+	return sites,downloads
 }
 func cfgparseline(buf string) (uint8, string){
 	// State options
