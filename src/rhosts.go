@@ -62,7 +62,8 @@ func main() {
 	cfgfb := bufio.NewScanner(cfgf)
 	cfgfb.Split(bufio.ScanLines)
 	for res := cfgfb.Scan();res;res = cfgfb.Scan() {
-		fmt.Println(cfgfb.Text())
+		state, body := cfgparseline(cfgfb.Text())
+		log.Print(state, body)
 	}
 	err = cfgfb.Err()
 	if err != nil {
@@ -70,6 +71,50 @@ func main() {
 	}
 }
 
-func cfgparse(buf string) string{
-	return ""
+func cfgparseline(buf string) (uint8, string){
+	// State options
+	// 0 - Init
+	// 1 - Error
+	// 2 - Comment
+	// 3 - Site
+	// 4 - Download
+	var state uint8= 0
+	body :=buf[:]
+	for i:=0; i<len(buf);i++ {
+		//fmt.Printf("%c",buf[i])
+		switch buf[i] {
+		case ' ':
+		case '#':
+			state = 2
+		case 'd':
+			if (len(buf) < i+10) {
+				state = 1
+				break
+			}
+			if (buf[i:(i+9)] == "download=") {
+				i +=9
+				state = 4
+				body = buf[i:]
+			} else{
+				state = 1
+			}
+		case 's':
+			if (len(buf) < i+6) {
+				state = 1
+				break
+			}
+			if (buf[i:(i+5)] == "site=") {
+				i +=5
+				state = 3
+				body = buf[i:]
+			} else{
+				state = 0
+			}
+			//compare buf[i:(i+3)] to "site"
+		}
+		if (state !=0){ 
+			return state,body
+		}
+	}
+	return state, body
 }
