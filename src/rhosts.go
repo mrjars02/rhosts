@@ -53,24 +53,28 @@ func main() {
 	}
 
 	// Parse Config
+	cfgparse(cfgloc)
+	
+}
+
+func cfgparse (cfgloc string){
 	log.Print("Opening: ", cfgloc)
-	cfgf, err := os.Open(cfgloc)
-	defer cfgf.Close()
+	file, err := os.Open(cfgloc)
+	defer file.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfgfb := bufio.NewScanner(cfgf)
-	cfgfb.Split(bufio.ScanLines)
-	for res := cfgfb.Scan();res;res = cfgfb.Scan() {
-		state, body := cfgparseline(cfgfb.Text())
+	filebuf := bufio.NewScanner(file)
+	filebuf.Split(bufio.ScanLines)
+	for res := filebuf.Scan();res;res = filebuf.Scan() {
+		state, body := cfgparseline(filebuf.Text())
 		log.Print(state, body)
 	}
-	err = cfgfb.Err()
+	err = filebuf.Err()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
-
 func cfgparseline(buf string) (uint8, string){
 	// State options
 	// 0 - Init
