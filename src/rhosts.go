@@ -170,9 +170,9 @@ func copystatichosts(tmpdir, hostsloc string) error {
 }
 
 func downloadcontent(downloads []string, tmpdir string) {
-	fileloc := tmpdir + "rhostsdown"
+	fileloc := tmpdir + "rhosts"
 	log.Print("Opening: ", fileloc)
-	file,err := os.Create(fileloc)
+	file,err := os.OpenFile(fileloc, os.O_APPEND|os.O_WRONLY, 0644)
 	if (err != nil) {
 		log.Fatal(err)
 	}
