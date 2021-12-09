@@ -43,6 +43,7 @@ func main() {
 	copystatichosts(tmpdir, hostsloc)
 	downloadcontent(downloads, tmpdir)
 	writesites(sites, tmpdir)
+	writetmp2hosts(hostsloc, tmpdir)
 }
 
 func sysdetect (tmpdir, hostsloc, cfgloc *string) {
@@ -223,5 +224,27 @@ func writesites(sites []string, tmpdir string) error {
 			break
 		}
 	}
+	return err
+}
+func writetmp2hosts(hostsloc, tmpdir string) error {
+	var err error = nil
+	tmploc := tmpdir + "rhosts"
+
+	hosts, err := os.Create(hostsloc)
+	if (err != nil){
+		log.Print(err)
+		return err
+	}
+	tmp, err := os.Open(tmploc)
+	if (err != nil){
+		log.Print(err)
+		return err
+	}
+	_,err = io.Copy(hosts,tmp)
+	if (err != nil){
+		log.Print(err)
+	}
+
+
 	return err
 }
