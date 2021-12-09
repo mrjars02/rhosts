@@ -23,38 +23,38 @@ package main
 
 import (
 	"runtime"
-	"fmt"
 	"os"
 	"bufio"
 	"log"
 )
 
 func main() {
-	// Detect which OS is running
-		//tmpdir := ""
-		//hostsloc := ""
-		cfgloc := ""
-	switch runtime.GOOS {
-	case "windows":
-		fmt.Println("Windows is currently unsupported")
-		os.Exit(1)
-		//tmpdir := "C:\\tmp"
-		//hostsloc := "C:\\Windows\\System32\\drivers\\etc\\hosts"
-	case "linux":
-		//tmpdir = "/tmp/"
-		//hostsloc = "/etc/hosts"
-		cfgloc ="/etc/rhosts/rhosts.cfg"
-	case "ios":
-		fmt.Println("ios")
-		os.Exit(1)
-	default:
-		log.Print(runtime.GOOS," is not supported")
-		os.Exit(1)
-	}
+	tmpdir := ""
+	hostsloc := ""
+	cfgloc := ""
 
-	// Parse Config
+	sysdetect (&tmpdir, &hostsloc, &cfgloc)
+
 	cfgparse(cfgloc)
 	
+}
+
+func sysdetect (tmpdir, hostsloc, cfgloc *string) {
+	// Detect OS and set params
+	switch runtime.GOOS {
+	case "windows":
+		log.Fatal("Windows is not supported")
+		*tmpdir = "C:\\tmp"
+		*hostsloc = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+	case "linux":
+		*tmpdir = "/tmp/"
+		*hostsloc = "/etc/hosts"
+		*cfgloc ="/etc/rhosts/rhosts.cfg"
+	case "ios":
+		log.Fatal("IOS is not supported")
+	default:
+		log.Fatal(runtime.GOOS," is not supported")
+	}
 }
 
 func cfgparse (cfgloc string){
