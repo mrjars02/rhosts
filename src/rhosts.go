@@ -28,22 +28,41 @@ import (
 	"bufio"
 	"log"
 	"net/http"
+	"flag"
+	"time"
 )
 
 func main() {
 	tmpdir := ""
 	hostsloc := ""
 	cfgloc := ""
+	i := true
+	var daemon bool=false
+	var interval int=1440
+
+	// Parsing Flags
+	flag.BoolVar(&daemon, "d", false, "Should this be run in daemon mode")
+	flag.IntVar(&interval, "t", 1440, "Minutes until next run of daemon")
+	flag.Parse()
+	log.Print("daemon:" , daemon)
+	log.Print("interval:",interval)
 
 	sysdetect (&tmpdir, &hostsloc, &cfgloc)
 
-	sites, downloads := cfgparse(cfgloc)
-	log.Print("Sites:\n",sites)
-	log.Print("Downloads:\n",downloads)
-	copystatichosts(tmpdir, hostsloc)
-	downloadcontent(downloads, tmpdir)
-	writesites(sites, tmpdir)
-	writetmp2hosts(hostsloc, tmpdir)
+	for ;i == true; time.Sleep(time.Duration(interval) * time.Minute){
+		sites, downloads := cfgparse(cfgloc)
+		log.Print("Sites:\n",sites)
+		log.Print("Downloads:\n",downloads)
+		copystatichosts(tmpdir, hostsloc)
+		downloadcontent(downloads, tmpdir)
+		writesites(sites, tmpdir)
+		writetmp2hosts(hostsloc, tmpdir)
+		log.Print("Finished updating host")
+		i = daemon
+		if (i == false){
+			break
+		}
+	}
 }
 
 func sysdetect (tmpdir, hostsloc, cfgloc *string) {
@@ -183,11 +202,11 @@ func downloadcontent(downloads []string, tmpdir string) {
 		log.Print("Downloading: ",d)
 		file.WriteString("# rhosts download - " + d + "\n")
 		if (err != nil) {
-			continue
 		}
 		response, err := http.Get(d)
 		if (err !=nil) {
 			log.Print(err)
+			continue
 		}else{
 			_,err := io.Copy(file,response.Body)
 			if (err != nil){
