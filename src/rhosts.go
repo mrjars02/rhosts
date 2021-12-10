@@ -49,18 +49,37 @@ func main() {
 
 	sysdetect (&tmpdir, &hostsloc, &cfgloc)
 
-	for ;i == true; time.Sleep(time.Duration(interval) * time.Minute){
-		sites, downloads := cfgparse(cfgloc)
-		log.Print("Sites:\n",sites)
-		log.Print("Downloads:\n",downloads)
-		copystatichosts(tmpdir, hostsloc)
-		downloadcontent(downloads, tmpdir)
-		writesites(sites, tmpdir)
-		writetmp2hosts(hostsloc, tmpdir)
-		log.Print("Finished updating host")
+	for i == true {
+		err := error(nil)
 		i = daemon
-		if (i == false){
-			break
+		sites, downloads, err := cfgparse(cfgloc)
+		if (err != nil){
+			log.Print("Failed to parse config file")
+			continue
+		}
+		err = copystatichosts(tmpdir, hostsloc)
+		if (err != nil){
+			log.Print("Failed to copy static entries")
+			continue
+		}
+		err = downloadcontent(downloads, tmpdir)
+		if (err != nil){
+			log.Print("Failed to download entries")
+			continue
+		}
+		err = writesites(sites, tmpdir)
+		if (err != nil){
+			log.Print("Failed to failed to copy rhosts static entries")
+			continue
+		}
+		err = writetmp2hosts(hostsloc, tmpdir)
+		if (err != nil){
+			log.Print("Failed to copy to hosts file")
+			continue
+		}
+		log.Print("Finished updating host")
+		if (i == true){
+			time.Sleep(time.Duration(interval) * time.Minute)
 		}
 	}
 }
@@ -83,14 +102,16 @@ func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 	}
 }
 
-func cfgparse (cfgloc string) ([]string, []string){
+func cfgparse (cfgloc string) ([]string, []string, error){
+	var err error=nil
 	var downloads []string
 	var sites []string
 	log.Print("Opening: ", cfgloc)
 	file, err := os.Open(cfgloc)
 	defer file.Close()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, nil,err
 	}
 	filebuf := bufio.NewScanner(file)
 	filebuf.Split(bufio.ScanLines)
@@ -105,9 +126,10 @@ func cfgparse (cfgloc string) ([]string, []string){
 	}
 	err = filebuf.Err()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, nil, err
 	}
-	return sites,downloads
+	return nil, nil, err
 }
 func cfgparseline(buf string) (uint8, string){
 	// State options
@@ -189,12 +211,14 @@ func copystatichosts(tmpdir, hostsloc string) error {
 	return err
 }
 
-func downloadcontent(downloads []string, tmpdir string) {
+func downloadcontent(downloads []string, tmpdir string) error{
+	var err error=nil
 	fileloc := tmpdir + "rhosts"
 	log.Print("Opening: ", fileloc)
 	file,err := os.OpenFile(fileloc, os.O_APPEND|os.O_WRONLY, 0644)
 	if (err != nil) {
-		log.Fatal(err)
+		log.Print(err)
+		return err
 	}
 	defer file.Close()
 
@@ -206,19 +230,22 @@ func downloadcontent(downloads []string, tmpdir string) {
 		response, err := http.Get(d)
 		if (err !=nil) {
 			log.Print(err)
-			continue
+			return err
 		}else{
 			_,err := io.Copy(file,response.Body)
 			if (err != nil){
 				log.Print(err)
+				return err
 			}
 		}
 		defer response.Body.Close()
 		file.WriteString("\n")
 		if (err != nil) {
-			continue
+			log.Print(err)
+			return err
 		}
 	}
+	return err
 }
 
 func writesites(sites []string, tmpdir string) error {
