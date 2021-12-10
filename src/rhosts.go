@@ -129,7 +129,7 @@ func cfgparse (cfgloc string) ([]string, []string, error){
 		log.Print(err)
 		return nil, nil, err
 	}
-	return nil, nil, err
+	return sites, downloads, err
 }
 func cfgparseline(buf string) (uint8, string){
 	// State options
