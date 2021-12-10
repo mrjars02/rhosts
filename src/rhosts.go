@@ -62,6 +62,7 @@ func main() {
 			log.Print("Failed to copy static entries")
 			continue
 		}
+		defer os.Remove(tmpdir + "rhosts")
 		err = downloadcontent(downloads, tmpdir)
 		if (err != nil){
 			log.Print("Failed to download entries")
