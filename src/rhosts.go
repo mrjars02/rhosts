@@ -63,7 +63,7 @@ func main() {
 			continue
 		}
 		defer os.Remove(tmpdir + "rhosts")
-		err = downloadcontent(downloads, tmpdir)
+		err = downloadcontent(downloads, tmpdir, hostsloc)
 		if (err != nil){
 			log.Print("Failed to download entries")
 			continue
@@ -212,7 +212,7 @@ func copystatichosts(tmpdir, hostsloc string) error {
 	return err
 }
 
-func downloadcontent(downloads []string, tmpdir string) error{
+func downloadcontent(downloads []string, tmpdir string, hostsloc string) error{
 	var err error=nil
 	fileloc := tmpdir + "rhosts"
 	log.Print("Opening: ", fileloc)
@@ -231,7 +231,9 @@ func downloadcontent(downloads []string, tmpdir string) error{
 		response, err := http.Get(d)
 		if (err !=nil) {
 			log.Print(err)
-			return err
+			log.Print("Looking for old record in hosts file")
+			downloadoldlookup(file, hostsloc, d)
+			continue
 		}else{
 			_,err := io.Copy(file,response.Body)
 			if (err != nil){
@@ -249,6 +251,45 @@ func downloadcontent(downloads []string, tmpdir string) error{
 	return err
 }
 
+func downloadoldlookup(file *os.File, hostsloc, d string) error {
+	var err error = nil
+	var state uint8 = 0
+	
+	hostsf, err := os.Open(hostsloc)
+	if (err != nil){
+		log.Print(err)
+		return err
+	}
+	defer hostsf.Close()
+
+	fbuff := bufio.NewScanner(hostsf)
+	fbuff.Split(bufio.ScanLines)
+	for res := fbuff.Scan();res;res = fbuff.Scan() {
+		buff := fbuff.Text()
+		switch state {
+		case 0:
+			if (buff == "# rhosts download - " + d){
+				log.Print("Found old record in hosts file:" + buff)
+				state =1
+			}
+		case 1:
+			if (len(buff) >=9 && buff[0:8] == "# rhosts"){
+				state = 2
+			}else{
+				_,err := file.WriteString(buff + "\n")
+				if (err != nil) {
+					log.Print(err)
+					return err
+				}
+			}
+		case 3:
+			return nil
+		}
+			
+	}
+
+	return err
+}
 func writesites(sites []string, tmpdir string) error {
 	var err error = nil
 	fileloc := tmpdir + "rhosts"
