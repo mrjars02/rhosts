@@ -18,7 +18,7 @@
  */
 
 
-// rhosts - Program used to maintain a blocklist within a hostfile
+// rhosts - Program used to maintain a blocklist appended to a host file 
 package main
 
 import (
@@ -85,6 +85,7 @@ func main() {
 	}
 }
 
+// sysdetect determines which OS it is running on and set the default locations
 func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 	// Detect OS and set params
 	switch runtime.GOOS {
@@ -103,6 +104,7 @@ func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 	}
 }
 
+// cfgparse recieves the location of the config file and returns a list of sites to add and content to download
 func cfgparse (cfgloc string) ([]string, []string, error){
 	var err error=nil
 	var downloads []string
@@ -132,6 +134,8 @@ func cfgparse (cfgloc string) ([]string, []string, error){
 	}
 	return sites, downloads, err
 }
+
+// cfgparseline reads a single line of the config and returns the type and content of the line
 func cfgparseline(buf string) (uint8, string){
 	// State options
 	// 0 - Init
@@ -180,6 +184,7 @@ func cfgparseline(buf string) (uint8, string){
 	return state, body
 }
 
+// copystatichosts copies the hosts not managed by rhosts from the hosts file to the start of the temporary file
 func copystatichosts(tmpdir, hostsloc string) error {
 	fileloc := tmpdir + "rhosts"
 	file, err := os.Create(fileloc)
@@ -212,6 +217,7 @@ func copystatichosts(tmpdir, hostsloc string) error {
 	return err
 }
 
+// downloadcontent attempts to download the provided url to the temp file. If the file fails to download it attempts to find an old copy from the hosts file.
 func downloadcontent(downloads []string, tmpdir string, hostsloc string) error{
 	var err error=nil
 	fileloc := tmpdir + "rhosts"
@@ -251,6 +257,7 @@ func downloadcontent(downloads []string, tmpdir string, hostsloc string) error{
 	return err
 }
 
+// downloadoldlookup attemps to find an entry in the hosts file and write it to the temp file.
 func downloadoldlookup(file *os.File, hostsloc, d string) error {
 	var err error = nil
 	var state uint8 = 0
@@ -290,6 +297,8 @@ func downloadoldlookup(file *os.File, hostsloc, d string) error {
 
 	return err
 }
+
+// writesites writes the list of sites from the config file to the temp file
 func writesites(sites []string, tmpdir string) error {
 	var err error = nil
 	fileloc := tmpdir + "rhosts"
@@ -314,6 +323,8 @@ func writesites(sites []string, tmpdir string) error {
 	}
 	return err
 }
+
+// writetmp2hosts overwrites the hostsfile with the tmp file
 func writetmp2hosts(hostsloc, tmpdir string) error {
 	var err error = nil
 	tmploc := tmpdir + "rhosts"
