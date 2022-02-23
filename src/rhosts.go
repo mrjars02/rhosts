@@ -36,7 +36,6 @@ func main() {
 	tmpdir := ""
 	hostsloc := ""
 	cfgloc := ""
-	i := true
 	var daemon bool=false
 	var interval int=1440
 
@@ -49,9 +48,8 @@ func main() {
 
 	sysdetect (&tmpdir, &hostsloc, &cfgloc)
 
-	for i == true {
+	for true {
 		err := error(nil)
-		i = daemon
 		sites, downloads, err := cfgparse(cfgloc)
 		if (err != nil){
 			log.Print("Failed to parse config file")
@@ -79,8 +77,10 @@ func main() {
 			continue
 		}
 		log.Print("Finished updating host")
-		if (i == true){
+		if (daemon == true){
 			time.Sleep(time.Duration(interval) * time.Minute)
+		}else{
+			break
 		}
 	}
 }
