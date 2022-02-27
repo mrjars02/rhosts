@@ -438,6 +438,10 @@ func write2tmp(tmpdir string, siteBuff *[]siteList) (err error) {
 				if err != nil {
 					return err
 				}
+				_, err = tmpf.WriteString(":: " + site.site + "\n")
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
