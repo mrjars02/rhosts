@@ -108,9 +108,10 @@ func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 	// Detect OS and set params
 	switch runtime.GOOS {
 	case "windows":
-		log.Fatal("Windows is not supported")
-		*tmpdir = "C:\\tmp"
-		*hostsloc = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+		//log.Fatal("Windows is not supported")
+		*tmpdir = "/tmp"
+		*hostsloc = "/Windows/System32/drivers/etc/hosts"
+		*cfgloc = "/rhosts.cfg"
 	case "linux":
 		*tmpdir = "/tmp/"
 		*hostsloc = "/etc/hosts"
