@@ -83,7 +83,7 @@ func main() {
 			log.Print("Failed to failed to copy rhosts static entries")
 			continue
 		}
-		removeduplicates(&siteBuff)
+		removeduplicates(&siteBuff, &whitelist)
 		err = write2tmp(tmpdir, &siteBuff)
 		if (err != nil){
 			log.Print("Failed to write sites to tmpfile")
@@ -382,8 +382,8 @@ func writesites(sites []string, tmpdir string, siteBuff *[]siteList) (err error)
 	*siteBuff = append(*siteBuff,localList)
 	return
 }
-// removeduplicates removes any duplicate addresses
-func removeduplicates(siteBuff *[]siteList){
+// removeduplicates removes any duplicate or uneeded/unwanted addresses
+func removeduplicates(siteBuff *[]siteList, whitelist *[]string){
 	var safewords = []string{"localhost", "localhost.localdomain", "broadcasthost", "ip6-loopback", "ip6-localhost", "ip6-localnet", "ip6-mcastprefix", "ip6-allnodes", "ip6-allrouters", "ip6-allhosts", "local"}
 	var counter = uint(0)
 	log.Print("Checking for duplicates")
@@ -406,6 +406,16 @@ func removeduplicates(siteBuff *[]siteList){
 	lenEntry := len(entry)
 	for i,e := range(entry) {
 		for _,w := range(safewords){
+			if *e.s == w {
+				*(entry[i].r) = true
+				counter ++
+				break
+			}
+		}
+		if *(entry[i].r) == true {
+			continue
+		}
+		for _,w := range(*whitelist){
 			if *e.s == w {
 				*(entry[i].r) = true
 				counter ++
