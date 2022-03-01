@@ -60,8 +60,9 @@ func main() {
 	sysdetect (&tmpdir, &hostsloc, &cfgloc)
 
 	for true {
+		var sites, downloads, whitelist []string
 		err := error(nil)
-		sites, downloads, err := cfgparse(cfgloc)
+		err = cfgparse(&sites, &downloads, &whitelist, cfgloc)
 		if (err != nil){
 			log.Print("Failed to parse config file")
 			continue
@@ -124,16 +125,14 @@ func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 }
 
 // cfgparse recieves the location of the config file and returns a list of sites to add and content to download
-func cfgparse (cfgloc string) ([]string, []string, error){
+func cfgparse (sites, downloads, whitelist *[]string, cfgloc string) (error){
 	var err error=nil
-	var downloads []string
-	var sites []string
 	log.Print("Opening: ", cfgloc)
 	file, err := os.Open(cfgloc)
 	defer file.Close()
 	if err != nil {
 		log.Print(err)
-		return nil, nil,err
+		return err
 	}
 	filebuf := bufio.NewScanner(file)
 	filebuf.Split(bufio.ScanLines)
@@ -141,17 +140,19 @@ func cfgparse (cfgloc string) ([]string, []string, error){
 		state, body := cfgparseline(filebuf.Text())
 		switch state {
 		case 3:
-			sites =append(sites,body)
+			*sites =append(*sites,body)
 		case 4:
-			downloads = append(downloads,body)
+			*downloads = append(*downloads,body)
+		case 5:
+			*whitelist = append(*whitelist,body)
 	}
 	}
 	err = filebuf.Err()
 	if err != nil {
 		log.Print(err)
-		return nil, nil, err
+		return err
 	}
-	return sites, downloads, err
+	return  err
 }
 
 // cfgparseline reads a single line of the config and returns the type and content of the line
@@ -162,6 +163,7 @@ func cfgparseline(buf string) (uint8, string){
 	// 2 - Comment
 	// 3 - Site
 	// 4 - Download
+	// 5 - Whitelist
 	var state uint8= 0
 	body :=buf[:]
 	for i:=0; i<len(buf);i++ {
@@ -195,6 +197,18 @@ func cfgparseline(buf string) (uint8, string){
 				state = 0
 			}
 			//compare buf[i:(i+3)] to "site"
+		case 'w':
+			if (len(buf) < i+10) {
+				state = 1
+				break
+			}
+			if (buf[i:(i+10)] == "whitelist=") {
+				i +=10
+				state = 5
+				body = buf[i:]
+			} else{
+				state = 1
+			}
 		}
 		if (state !=0){ 
 			return state,body
