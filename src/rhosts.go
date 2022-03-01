@@ -402,7 +402,6 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string){
 		r *bool
 		s *string
 	}
-	_ = entry
 	for i := len((*siteBuff))-1; i > -1; i --{
 		for j := len((*siteBuff)[i].siteEntry)-1; j > -1; j -- {
 			entryBuff.r = &((*siteBuff)[i].siteEntry[j].repeat)
@@ -436,7 +435,7 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string){
 			break
 		}
 		for j,n := range(entry[i+1:]){
-			if *e.s == *n.s || *e.s == "localhost" {
+			if *e.s == *n.s {
 				*(entry[i+j].r) = true
 				c.d ++
 			}
