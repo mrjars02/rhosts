@@ -112,11 +112,11 @@ func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 		//log.Fatal("Windows is not supported")
 		*tmpdir = "/tmp"
 		*hostsloc = "/Windows/System32/drivers/etc/hosts"
-		*cfgloc = "/rhosts.cfg"
+		*cfgloc = "/ProgramData/rhosts/"
 	case "linux":
 		*tmpdir = "/tmp/"
 		*hostsloc = "/etc/hosts"
-		*cfgloc ="/etc/rhosts/rhosts.cfg"
+		*cfgloc ="/etc/rhosts/"
 	case "ios":
 		log.Fatal("IOS is not supported")
 	default:
@@ -126,9 +126,20 @@ func sysdetect (tmpdir, hostsloc, cfgloc *string) {
 
 // cfgparse recieves the location of the config file and returns a list of sites to add and content to download
 func cfgparse (sites, downloads, whitelist *[]string, cfgloc string) (error){
+	l := (cfgloc + "rhosts.cfg")
 	var err error=nil
-	log.Print("Opening: ", cfgloc)
-	file, err := os.Open(cfgloc)
+	log.Print("Opening: ", l)
+	if _,err = os.Stat(cfgloc); os.IsNotExist(err) {
+		log.Print(cfgloc + " Does not exist, attempting to create it")
+		err = os.MkdirAll(cfgloc,731)
+		if err != nil {
+			log.Fatal("Could not create " + cfgloc)
+		}
+	}
+	if _,err = os.Stat(l); os.IsNotExist(err) {
+		log.Fatal(l + " does not exist, you need to create it")
+	}
+	file, err := os.Open(l)
 	defer file.Close()
 	if err != nil {
 		log.Print(err)
