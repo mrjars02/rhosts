@@ -1,6 +1,6 @@
 # rhosts
 
-This reroutes sites to 0.0.0.0 in order to block them from being reached by adding them automatically to the hosts file.   
+This reroutes urls to 0.0.0.0 and ::1 in order to block them from being reached. This is useful for blocking different types of content.   
 
 ## How to use
 
@@ -11,7 +11,7 @@ Open the config file:
         Windows: \ProgramData\rhosts\rhosts.cfg
 
 
-There are 2 types of entries: download and site. Downloads are currently downloaded straight into the config without error checking, sites are added with an IP address prepended. You can also add comments by prepending with a '#'.    
+There are 3 types of entries: download, site, and whitelist. Downloads are downloaded and stripped of comments and bad entries if possible before being added to a list of sites. Whitelisted urls are removed from the list of sites. From there all the urls are added to the hosts file for both IPv4 and IPv6. You can also add comments by prepending with a '#'.    
 
 Example:    
 
@@ -19,3 +19,5 @@ Example:
         site=www.site.xyz
         # This is a download entry
         download=w3.site.xyz/location/to/config.txt
+		# This is a whitelist entry
+		whitelist=www.site.xyz
