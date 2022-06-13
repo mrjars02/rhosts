@@ -30,7 +30,7 @@ Displays version information
 
 - -d  
 
-Runs in daemon mode, refreshing every 24hrs (1440 minutes)  
+Runs in daemon mode, refreshing every 24hrs (1440 minutes**  
 
 - -t <minutes>  
 
@@ -47,8 +47,15 @@ Linux/Systemd:
 
 		make install
 
-Windows:
+For Windows on Linux:
 
 		make build-win
 
-The windows build can be performed on a Linux system and moved to Windows.
+Windows:   
+Requires go https://go.dev/doc/install#windows  
+
+		cd src
+        go build .
+
+**Building has not been tested on Windows***
+
