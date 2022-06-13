@@ -13,20 +13,22 @@ TARBALLNAME=$(TARBALLPREFIX).tar.gz
 GOBUILDFLAGS=
 GITOFF=0
 
-.PHONY: version
-version:
-	echo "package main\nvar version string=\"$(VERSION)\"" > $(PROJROOT)src/version.go
+.PHONY: configure
+configure:
+	echo "package main\nvar version string=\"$(VERSION)\"" > $(PROJROOT)src/configure.go
+	echo 'const CFG = `'  >> $(PROJROOT)src/configure.go
+	cat $(PROJROOT)src/rhosts_default.cfg >> $(PROJROOT)src/configure.go
+	echo '`'  >> $(PROJROOT)src/configure.go
 .PHONY: build
-build: version
-	if [ ! -d $(PROJROOT)/build ]; then \
+build: configure
+	if [ ! -d $(PROJROOT)build ]; then \
 		mkdir -p $(PROJROOT)build/share/rhosts/systemd $(PROJROOT)build/bin \
 	;fi
-
-
+	cp src/rhosts_default.cfg $(PROJROOT)build/share/rhosts
 	cd $(PROJROOT)src && go build -o $(PROJROOT)build/bin/ $(GOBUILDFLAGS) ./
 	cp -r $(PROJROOT)src/systemd $(PROJROOT)/build/share/rhosts/
 .PHONY: build-win
-build-win: version
+build-win: configure
 	cd $(PROJROOT)src && GOOS=windows go build -o $(PROJROOT) $(GOBUILDFLAGS) ./
 .PHONY: install
 install: build
@@ -67,8 +69,8 @@ clean:
 	if [ -f $(PROJROOT)rhosts.exe ]; then \
 		rm -r $(PROJROOT)rhosts.exe \
 	;fi
-	if [ -f $(PROJROOT)src/version.go ]; then \
-		rm -r $(PROJROOT)src/version.go \
+	if [ -f $(PROJROOT)src/configure.go ]; then \
+		rm -r $(PROJROOT)src/configure.go \
 	;fi
 	if [ -f $(PROJROOT)$(TARBALLNAME) ]; then \
 		rm $(PROJROOT)$(TARBALLNAME) \
