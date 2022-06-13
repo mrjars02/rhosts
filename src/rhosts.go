@@ -69,21 +69,28 @@ func main() {
 	var daemon bool=false
 	var interval int=1440
 	var versionflag bool=false
+	var removetimestamp bool=false
 	var siteBuff []siteList
-
-	// GPL information
-	fmt.Println(GPL)
 
 	// Parsing Flags
 	flag.BoolVar(&daemon, "d", false, "Should this be run in daemon mode")
 	flag.IntVar(&interval, "t", 1440, "Minutes until next run of daemon")
 	flag.BoolVar(&versionflag, "version", false, "show version information")
+	flag.BoolVar(&removetimestamp, "removetimestamp", false, "Removes the timestamp, used with logging programs to prevent a double timestamp")
 	flag.Parse()
 
 	// Display version information
 	if versionflag {
 		fmt.Print("Rhosts version: " + version)
 		return
+	}
+
+	// Check if timestamp should be removed
+	if removetimestamp {
+		log.SetFlags(0)
+	}else{
+		// GPL information
+		fmt.Println(GPL)
 	}
 
 	if daemon {
