@@ -22,6 +22,20 @@ Example:
 		# This is a whitelist entry
 		whitelist=www.site.xyz
 
+### Other Commands
+
+- --version  
+
+Displays version information  
+
+- -d  
+
+Runs in daemon mode, refreshing every 24hrs (1440 minutes)  
+
+- -t <minutes>  
+
+Changes the daemon refresh time
+
 ## How to Install
 
 Build Dependencies:
