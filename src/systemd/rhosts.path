@@ -2,7 +2,7 @@
 Description="Monitor the /etc/passwd file for changes"
 
 [Path]
-PathModified=/etc/rhosts.cfg
+PathModified=/etc/rhosts/rhosts.cfg
 Unit=rhosts.service
 
 [Install]
