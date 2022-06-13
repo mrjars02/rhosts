@@ -18,6 +18,7 @@ build:
 		mkdir -p $(PROJROOT)build/share/rhosts/systemd $(PROJROOT)build/bin \
 	;fi
 
+	echo "package main\nvar version string=\"$(VERSION)\"" > $(PROJROOT)src/version.go
 
 	cd $(PROJROOT)src && go build -o $(PROJROOT)build/bin/ $(GOBUILDFLAGS) ./
 	cp -r $(PROJROOT)src/systemd $(PROJROOT)/build/share/rhosts/
@@ -51,6 +52,9 @@ uninstall:
 clean:
 	if [ -d $(PROJROOT)build ]; then \
 		rm -r $(PROJROOT)build \
+	;fi
+	if [ -f $(PROJROOT)src/version.go ]; then \
+		rm -r $(PROJROOT)src/version.go \
 	;fi
 	if [ -f $(PROJROOT)$(TARBALLNAME) ]; then \
 		rm $(PROJROOT)$(TARBALLNAME) \

@@ -68,6 +68,7 @@ func main() {
 	cfgloc := ""
 	var daemon bool=false
 	var interval int=1440
+	var versionflag bool=false
 	var siteBuff []siteList
 
 	// GPL information
@@ -76,7 +77,16 @@ func main() {
 	// Parsing Flags
 	flag.BoolVar(&daemon, "d", false, "Should this be run in daemon mode")
 	flag.IntVar(&interval, "t", 1440, "Minutes until next run of daemon")
+	flag.BoolVar(&versionflag, "version", false, "show version information")
 	flag.Parse()
+
+	// Display version information
+	if versionflag {
+		fmt.Print("Rhosts version: " + version)
+		return
+	}
+
+
 	log.Print("daemon:" , daemon)
 	log.Print("interval:",interval)
 
