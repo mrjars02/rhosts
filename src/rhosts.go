@@ -30,6 +30,7 @@ import (
 	"net/http"
 	"flag"
 	"time"
+	"fmt"
 )
 // siteList holds the location of all the sites along with a list of their location
 type siteList struct {
@@ -42,6 +43,25 @@ type siteEntry struct {
 	site string
 }
 
+const GPL =`
+    rhosts maintains a blocklist and appends it to the system hosts file
+
+    Copyright (C) 2021  Justin Reichardt
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+`
+
 func main() {
 	tmpdir := ""
 	hostsloc := ""
@@ -49,6 +69,9 @@ func main() {
 	var daemon bool=false
 	var interval int=1440
 	var siteBuff []siteList
+
+	// GPL information
+	fmt.Println(GPL)
 
 	// Parsing Flags
 	flag.BoolVar(&daemon, "d", false, "Should this be run in daemon mode")
