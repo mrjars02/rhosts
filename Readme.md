@@ -21,3 +21,20 @@ Example:
         download=w3.site.xyz/location/to/config.txt
 		# This is a whitelist entry
 		whitelist=www.site.xyz
+
+## How to Install
+
+Build Dependencies:
+
+- make
+- golang
+
+Linux/Systemd:
+
+		make install
+
+Windows:
+
+		make build-win
+
+The windows build can be performed on a Linux system and moved to Windows.
