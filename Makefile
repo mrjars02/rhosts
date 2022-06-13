@@ -13,6 +13,7 @@ TARBALLNAME=$(TARBALLPREFIX).tar.gz
 GOBUILDFLAGS=
 GITOFF=0
 
+.PHONY: build
 build:
 	if [ ! -d $(PROJROOT)/build ]; then \
 		mkdir -p $(PROJROOT)build/share/rhosts/systemd $(PROJROOT)build/bin \
@@ -22,11 +23,13 @@ build:
 
 	cd $(PROJROOT)src && go build -o $(PROJROOT)build/bin/ $(GOBUILDFLAGS) ./
 	cp -r $(PROJROOT)src/systemd $(PROJROOT)/build/share/rhosts/
+.PHONY: build-win
 build-win:
 	if [ ! -d $(PROJROOT)/build ]; then \
 		mkdir -p $(PROJROOT)build \
 	;fi
 	cd $(PROJROOT)src && GOOS=windows go build -o $(PROJROOT)build/ $(GOBUILDFLAGS) ./
+.PHONY: install
 install: build
 	install -D $(PROJROOT)build/bin/rhosts $(BINDIR)/
 	cp -r  $(PROJROOT)build/share/rhosts $(DATADIR)
@@ -39,6 +42,7 @@ install: build
 	if [ ! -h /usr/lib/systemd/system/rhosts.timer ]; then \
 		ln -s $(DATADIR)rhosts/systemd/rhosts.timer /usr/lib/systemd/system/rhosts.timer \
 	;fi
+.PHONY: uninstall
 uninstall:
 	if [ -f $(BINDIR)/rhosts ]; then \
 	rm $(BINDIR)/rhosts \
@@ -55,6 +59,7 @@ uninstall:
 	if [ -h /usr/lib/systemd/system/rhosts.timer ]; then \
 		rm /usr/lib/systemd/system/rhosts.timer \
 	;fi
+.PHONY: clean
 clean:
 	if [ -d $(PROJROOT)build ]; then \
 		rm -r $(PROJROOT)build \
@@ -65,6 +70,7 @@ clean:
 	if [ -f $(PROJROOT)$(TARBALLNAME) ]; then \
 		rm $(PROJROOT)$(TARBALLNAME) \
 	;fi
+.PHONY: dist
 dist: clean
 	if [ -d $(PROJROOT).git ] && [ $(GITOFF) = 0 ]; then \
 		git archive --format=tar.gz -o $(PROJROOT)$(TARBALLNAME) --prefix=$(TARBALLPREFIX)/ `git branch --show-current` \
