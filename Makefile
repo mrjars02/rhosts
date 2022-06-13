@@ -33,13 +33,13 @@ install: build
 	install -D $(PROJROOT)build/bin/rhosts $(BINDIR)/
 	cp -r  $(PROJROOT)build/share/rhosts $(DATADIR)
 	if [ ! -h /usr/lib/systemd/system/rhosts.service ]; then \
-		ln -s $(DATADIR)rhosts/systemd/rhosts.service /usr/lib/systemd/system/rhosts.service \
+		ln -s $(DATADIR)/rhosts/systemd/rhosts.service /usr/lib/systemd/system/rhosts.service \
 	;fi
 	if [ ! -h /usr/lib/systemd/system/rhosts.path ]; then \
-		ln -s $(DATADIR)rhosts/systemd/rhosts.path /usr/lib/systemd/system/rhosts.path \
+		ln -s $(DATADIR)/rhosts/systemd/rhosts.path /usr/lib/systemd/system/rhosts.path \
 	;fi
 	if [ ! -h /usr/lib/systemd/system/rhosts.timer ]; then \
-		ln -s $(DATADIR)rhosts/systemd/rhosts.timer /usr/lib/systemd/system/rhosts.timer \
+		ln -s $(DATADIR)/rhosts/systemd/rhosts.timer /usr/lib/systemd/system/rhosts.timer \
 	;fi
 .PHONY: uninstall
 uninstall:
