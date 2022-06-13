@@ -13,22 +13,21 @@ TARBALLNAME=$(TARBALLPREFIX).tar.gz
 GOBUILDFLAGS=
 GITOFF=0
 
+.PHONY: version
+version:
+	echo "package main\nvar version string=\"$(VERSION)\"" > $(PROJROOT)src/version.go
 .PHONY: build
-build:
+build: version
 	if [ ! -d $(PROJROOT)/build ]; then \
 		mkdir -p $(PROJROOT)build/share/rhosts/systemd $(PROJROOT)build/bin \
 	;fi
 
-	echo "package main\nvar version string=\"$(VERSION)\"" > $(PROJROOT)src/version.go
 
 	cd $(PROJROOT)src && go build -o $(PROJROOT)build/bin/ $(GOBUILDFLAGS) ./
 	cp -r $(PROJROOT)src/systemd $(PROJROOT)/build/share/rhosts/
 .PHONY: build-win
-build-win:
-	if [ ! -d $(PROJROOT)/build ]; then \
-		mkdir -p $(PROJROOT)build \
-	;fi
-	cd $(PROJROOT)src && GOOS=windows go build -o $(PROJROOT)build/ $(GOBUILDFLAGS) ./
+build-win: version
+	cd $(PROJROOT)src && GOOS=windows go build -o $(PROJROOT) $(GOBUILDFLAGS) ./
 .PHONY: install
 install: build
 	install -D $(PROJROOT)build/bin/rhosts $(BINDIR)/
@@ -63,6 +62,9 @@ uninstall:
 clean:
 	if [ -d $(PROJROOT)build ]; then \
 		rm -r $(PROJROOT)build \
+	;fi
+	if [ -f $(PROJROOT)rhosts.exe ]; then \
+		rm -r $(PROJROOT)rhosts.exe \
 	;fi
 	if [ -f $(PROJROOT)src/version.go ]; then \
 		rm -r $(PROJROOT)src/version.go \

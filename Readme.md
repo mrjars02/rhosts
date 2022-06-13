@@ -37,6 +37,7 @@ Runs in daemon mode, refreshing every 24hrs (1440 minutes**
 Changes the daemon refresh time
 
 ## How to Install
+### Linux  
 
 Build Dependencies:
 
@@ -47,12 +48,17 @@ Linux/Systemd:
 
 		make install
 
-For Windows on Linux:
+Build for Windows on Linux:
 
 		make build-win
 
+### Windows  
+
+Build Dependencies:  
+
+- Requires go https://go.dev/doc/install#windows  
+
 Windows:   
-Requires go https://go.dev/doc/install#windows  
 
 		cd src
         go build .
