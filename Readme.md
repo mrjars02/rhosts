@@ -2,6 +2,35 @@
 
 This reroutes urls to 0.0.0.0 and ::1 in order to block them from being reached. This is useful for blocking different types of content.   
 
+## How to Install
+### Linux  
+
+Build Dependencies:
+
+- make
+- golang
+
+Linux/Systemd:
+
+    make install
+
+Build for Windows on Linux:
+
+    make build-win
+
+### Windows  
+
+Build Dependencies:  
+
+- Requires go https://go.dev/doc/install#windows  
+
+Windows:   
+
+    cd src
+    go build .
+
+**Building has not been tested on Windows; however, it will fail because the version.go file is generated using the Makefile**
+
 ## How to use
 
 ### Configuring
@@ -54,34 +83,3 @@ Changes the daemon refresh time
 - --removetimestamp
 
 Removes the timestamp on the log so it doesn't interfere with other log systems such as Systemd  
-
-
-## How to Install
-### Linux  
-
-Build Dependencies:
-
-- make
-- golang
-
-Linux/Systemd:
-
-    make install
-
-Build for Windows on Linux:
-
-    make build-win
-
-### Windows  
-
-Build Dependencies:  
-
-- Requires go https://go.dev/doc/install#windows  
-
-Windows:   
-
-    cd src
-    go build .
-
-**Building has not been tested on Windows***
-
