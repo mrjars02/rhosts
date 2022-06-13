@@ -62,6 +62,19 @@ const GPL =`
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 `
 
+const CFG =`
+# There are 3 types of entries: download, site, and whitelist. Downloads are downloaded and stripped of comments and bad entries if possible before being added to a list of sites. Whitelisted urls are removed from the list of sites. From there all the urls are added to the hosts file for both IPv4 and IPv6. You can also add comments by prepending with a '#'.
+
+# This is a static entry
+#site=www.site.xyz
+# This is a download entry
+#download=w3.site.xyz/location/to/config.txt
+# This is a whitelist entry
+#whitelist=www.site.xyz
+
+# A suggested download is: https://github.com/StevenBlack/hosts
+#download=https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts`
+
 func main() {
 	tmpdir := ""
 	hostsloc := ""
@@ -172,13 +185,17 @@ func cfgparse (sites, downloads, whitelist *[]string, cfgloc string) (error){
 	log.Print("Opening: ", l)
 	if _,err = os.Stat(cfgloc); os.IsNotExist(err) {
 		log.Print(cfgloc + " Does not exist, attempting to create it")
-		err = os.MkdirAll(cfgloc,731)
+		err = os.MkdirAll(cfgloc,0755)
 		if err != nil {
 			log.Fatal("Could not create " + cfgloc)
 		}
 	}
 	if _,err = os.Stat(l); os.IsNotExist(err) {
-		log.Fatal(l + " does not exist, you need to create it")
+		log.Print(l + " does not exist, attempting to create a placeholder")
+		err = os.WriteFile(l,[]byte(CFG),0644)
+		if err != nil {
+			log.Fatal("Unable to create file: " + l)
+		}
 	}
 	file, err := os.Open(l)
 	defer file.Close()
