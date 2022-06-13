@@ -41,6 +41,7 @@ install: build
 	if [ ! -h /usr/lib/systemd/system/rhosts.timer ]; then \
 		ln -s $(DATADIR)/rhosts/systemd/rhosts.timer /usr/lib/systemd/system/rhosts.timer \
 	;fi
+	systemctl daemon-reload
 .PHONY: uninstall
 uninstall:
 	if [ -f $(BINDIR)/rhosts ]; then \
