@@ -66,7 +66,7 @@ You can also run it using Systemd:
     systemctl start rhosts.service
     
 
-### Other Commands
+### Flags
 
 - --version  
 
