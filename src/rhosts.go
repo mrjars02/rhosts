@@ -86,9 +86,10 @@ func main() {
 		return
 	}
 
-
-	log.Print("daemon:" , daemon)
-	log.Print("interval:",interval)
+	if daemon {
+		log.Print("daemon:" , daemon)
+		log.Print("interval:",interval)
+	}
 
 	sysdetect (&tmpdir, &hostsloc, &cfgloc)
 
