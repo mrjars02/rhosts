@@ -151,6 +151,9 @@ func main() {
 
 		log.Print("Finished updating host")
 		if (daemon == true){
+			i := time.Now().Add(time.Duration(interval) * time.Minute).Format(time.Layout)
+			log.Printf("Sleeping for %d minutes", interval)
+			log.Print("Should restart at: " + i)
 			time.Sleep(time.Duration(interval) * time.Minute)
 		}else{
 			break
