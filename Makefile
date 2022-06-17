@@ -26,7 +26,7 @@ build: configure
 	;fi
 	cp src/rhosts_default.cfg $(PROJROOT)build/share/rhosts
 	cd $(PROJROOT)src && go build -o $(PROJROOT)build/bin/ $(GOBUILDFLAGS) ./
-	cp -r $(PROJROOT)src/systemd $(PROJROOT)/build/share/rhosts/
+	cp -r $(PROJROOT)src/systemd $(PROJROOT)build/share/rhosts/
 .PHONY: build-win
 build-win: configure
 	cd $(PROJROOT)src && GOOS=windows go build -o $(PROJROOT) $(GOBUILDFLAGS) ./
