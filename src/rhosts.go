@@ -17,25 +17,23 @@
  * along with rhosts.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-// rhosts - Program used to maintain a blocklist appended to a host file 
+// rhosts - Program used to maintain a blocklist appended to a host file
 package main
 
 import (
-	"log"
 	"flag"
 	"fmt"
-	"time"
-	sysos "jbreich/rhosts/sys"
-	"jbreich/rhosts/serve"
 	"jbreich/rhosts/cfg"
 	"jbreich/rhosts/hosts"
+	"jbreich/rhosts/serve"
+	sysos "jbreich/rhosts/sys"
+	"log"
+	"time"
 )
 
 var Exit chan bool
 
-
-const GPL =`
+const GPL = `
     rhosts maintains a blocklist and appends it to the system hosts file
 
     Copyright (C) 2021  Justin Reichardt
@@ -54,15 +52,14 @@ const GPL =`
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 `
 
-
 func main() {
 	tmpdir := ""
 	hostsloc := ""
 	cfgloc := ""
-	var daemon bool=false
-	var interval int=1440
-	var versionflag bool=false
-	var removetimestamp bool=false
+	var daemon bool = false
+	var interval int = 1440
+	var versionflag bool = false
+	var removetimestamp bool = false
 
 	// Parsing Flags
 	flag.BoolVar(&daemon, "d", false, "Should this be run in daemon mode")
@@ -80,42 +77,54 @@ func main() {
 	// Check if timestamp should be removed
 	if removetimestamp {
 		log.SetFlags(0)
-	}else{
+	} else {
 		// GPL information
 		fmt.Println(GPL)
 	}
 
 	if daemon {
-		log.Print("daemon:" , daemon)
-		log.Print("interval:",interval)
+		log.Print("daemon:", daemon)
+		log.Print("interval:", interval)
 	}
 
-	sysos.Detect (&tmpdir, &hostsloc, &cfgloc)
+	sysos.Detect(&tmpdir, &hostsloc, &cfgloc)
 
+	// Read the config file
 	config := cfg.Create(cfgloc)
-	err,config := config.Update()
-	log.Print(config)
-	if (err != nil){log.Panic("Failed to parse config: " + cfgloc)}
+	err, config := config.Update()
+	if err != nil {
+		log.Panic("Failed to parse config: " + cfgloc)
+	}
 
+	// Starting web server
+	serve.Start("blank")
 
-
-	for true {
+	// Update the hosts file
+	if daemon == false {
 		err := hosts.Update(config, tmpdir, hostsloc)
-		if (err != nil){
+		if err != nil {
 			log.Print(err)
 		}
-		log.Print("Finished updating host")
-		if (daemon == true){
-			i := time.Now().Add(time.Duration(interval) * time.Minute).Format(time.Layout)
-			log.Printf("Sleeping for %d minutes", interval)
-			log.Print("Should restart at: " + i)
-			time.Sleep(time.Duration(interval) * time.Minute)
-		}else{
-			break
+	} else {
+
+		for true {
+			err := hosts.Update(config, tmpdir, hostsloc)
+			if err != nil {
+				log.Print(err)
+			}
+
+			// Check if daemon
+			if daemon == false {
+				break
+			}
+
+			if err == nil {
+				i := time.Now().Add(time.Duration(interval) * time.Minute).Format(time.Layout)
+				log.Printf("Sleeping for %d minutes", interval)
+				log.Print("Should restart at: " + i)
+				time.Sleep(time.Duration(interval) * time.Minute)
+			}
 		}
 	}
-	serve.Start("blank")
-	<- Exit
+	<-Exit
 }
-
-

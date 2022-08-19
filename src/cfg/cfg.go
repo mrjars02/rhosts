@@ -1,9 +1,9 @@
 package cfg
 
 import (
+	"bufio"
 	"log"
 	"os"
-	"bufio"
 )
 
 const CFG = `
@@ -24,33 +24,33 @@ const CFG = `
 #download=https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts`
 
 type Config struct {
-	CfgLoc string
-	Sites []string
+	CfgLoc    string
+	Sites     []string
 	Downloads []string
 	Whitelist []string
 }
 
 // Create initialized a config to be used the entire session
-func Create(cfgLoc string)(cfg Config){
+func Create(cfgLoc string) (cfg Config) {
 	cfg.CfgLoc = cfgLoc
 	return
 }
 
 // cfgparse recieves the location of the config file and returns a list of sites to add and content to download
-func (cfg Config) Update() (error, Config){
+func (cfg Config) Update() (error, Config) {
 	l := (cfg.CfgLoc + "rhosts.cfg")
-	var err error=nil
+	var err error = nil
 	log.Print("Opening: ", l)
-	if _,err = os.Stat(cfg.CfgLoc); os.IsNotExist(err) {
+	if _, err = os.Stat(cfg.CfgLoc); os.IsNotExist(err) {
 		log.Print(cfg.CfgLoc + " Does not exist, attempting to create it")
-		err = os.MkdirAll(cfg.CfgLoc,0755)
+		err = os.MkdirAll(cfg.CfgLoc, 0755)
 		if err != nil {
 			log.Fatal("Could not create " + cfg.CfgLoc)
 		}
 	}
-	if _,err = os.Stat(l); os.IsNotExist(err) {
+	if _, err = os.Stat(l); os.IsNotExist(err) {
 		log.Print(l + " does not exist, attempting to create a placeholder")
-		err = os.WriteFile(l,[]byte(CFG),0644)
+		err = os.WriteFile(l, []byte(CFG), 0644)
 		if err != nil {
 			log.Fatal("Unable to create file: " + l)
 		}
@@ -63,16 +63,16 @@ func (cfg Config) Update() (error, Config){
 	}
 	filebuf := bufio.NewScanner(file)
 	filebuf.Split(bufio.ScanLines)
-	for res := filebuf.Scan();res;res = filebuf.Scan() {
+	for res := filebuf.Scan(); res; res = filebuf.Scan() {
 		state, body := cfgparseline(filebuf.Text())
 		switch state {
 		case 3:
-			cfg.Sites =append(cfg.Sites,body)
+			cfg.Sites = append(cfg.Sites, body)
 		case 4:
-			cfg.Downloads = append(cfg.Downloads,body)
+			cfg.Downloads = append(cfg.Downloads, body)
 		case 5:
-			cfg.Whitelist = append(cfg.Whitelist,body)
-	}
+			cfg.Whitelist = append(cfg.Whitelist, body)
+		}
 	}
 	err = filebuf.Err()
 	if err != nil {
@@ -83,7 +83,7 @@ func (cfg Config) Update() (error, Config){
 }
 
 // cfgparseline reads a single line of the config and returns the type and content of the line
-func cfgparseline(buf string) (uint8, string){
+func cfgparseline(buf string) (uint8, string) {
 	// State options
 	// 0 - Init
 	// 1 - Error
@@ -91,54 +91,54 @@ func cfgparseline(buf string) (uint8, string){
 	// 3 - Site
 	// 4 - Download
 	// 5 - Whitelist
-	var state uint8= 0
-	body :=buf[:]
-	for i:=0; i<len(buf);i++ {
+	var state uint8 = 0
+	body := buf[:]
+	for i := 0; i < len(buf); i++ {
 		//fmt.Printf("%c",buf[i])
 		switch buf[i] {
 		case ' ':
 		case '#':
 			state = 2
 		case 'd':
-			if (len(buf) < i+10) {
+			if len(buf) < i+10 {
 				state = 1
 				break
 			}
-			if (buf[i:(i+9)] == "download=") {
-				i +=9
+			if buf[i:(i+9)] == "download=" {
+				i += 9
 				state = 4
 				body = buf[i:]
-			} else{
+			} else {
 				state = 1
 			}
 		case 's':
-			if (len(buf) < i+6) {
+			if len(buf) < i+6 {
 				state = 1
 				break
 			}
-			if (buf[i:(i+5)] == "site=") {
-				i +=5
+			if buf[i:(i+5)] == "site=" {
+				i += 5
 				state = 3
 				body = buf[i:]
-			} else{
+			} else {
 				state = 0
 			}
 			//compare buf[i:(i+3)] to "site"
 		case 'w':
-			if (len(buf) < i+10) {
+			if len(buf) < i+10 {
 				state = 1
 				break
 			}
-			if (buf[i:(i+10)] == "whitelist=") {
-				i +=10
+			if buf[i:(i+10)] == "whitelist=" {
+				i += 10
 				state = 5
 				body = buf[i:]
-			} else{
+			} else {
 				state = 1
 			}
 		}
-		if (state !=0){ 
-			return state,body
+		if state != 0 {
+			return state, body
 		}
 	}
 	return state, body
