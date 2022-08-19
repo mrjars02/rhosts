@@ -83,7 +83,7 @@ func main() {
 	}
 
 	// Starting web server
-	serve.Start("blank")
+	serve.Start()
 
 	// Update the hosts file
 	if daemon == false {
