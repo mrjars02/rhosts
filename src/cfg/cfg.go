@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"strconv"
 )
 
 const CFG = `
@@ -45,15 +46,16 @@ func Create() (cfg Config) {
 	for _,fp := range(configFuncs){
 		fp(&cfg)
 	}
-	if (cfg.System.OS == ""){log.Panic("Failed to detect the OS")}
+	if (cfg.System.OS == ""){log.Fatal("Failed to detect the OS")}
 	err, cfg := cfg.Update()
 
-	if (err != nil){log.Panic("Failed to handle the config file: " + err.Error())}
+	if (err != nil){log.Fatal("Failed to handle the config file: " + err.Error())}
 	return
 }
 
 // cfgparse recieves the location of the config file and returns a list of sites to add and content to download
 func (cfg Config) Update() (error, Config) {
+	// Opening the config file
 	l := (cfg.System.CfgLoc + "rhosts.cfg")
 	var err error = nil
 	log.Print("Opening: ", l)
@@ -64,6 +66,10 @@ func (cfg Config) Update() (error, Config) {
 			log.Fatal("Could not create " + cfg.System.CfgLoc)
 		}
 	}
+
+	// Create one if it doesn't exist
+	// This is done after so that it doesn't read the default one
+	// in the event one doesn't exist
 	if _, err = os.Stat(l); os.IsNotExist(err) {
 		log.Print(l + " does not exist, attempting to create a placeholder")
 		err = os.WriteFile(l, []byte(CFG), 0644)
@@ -79,15 +85,12 @@ func (cfg Config) Update() (error, Config) {
 	}
 	filebuf := bufio.NewScanner(file)
 	filebuf.Split(bufio.ScanLines)
-	for res := filebuf.Scan(); res; res = filebuf.Scan() {
-		state, body := cfgparseline(filebuf.Text())
-		switch state {
-		case 3:
-			cfg.Sites = append(cfg.Sites, body)
-		case 4:
-			cfg.Downloads = append(cfg.Downloads, body)
-		case 5:
-			cfg.Whitelist = append(cfg.Whitelist, body)
+	for i , res := 0,filebuf.Scan(); res; res = filebuf.Scan() {
+		i++
+		buf := filebuf.Text()
+		if (cfgparseline(buf, &cfg) == true){
+
+			log.Fatal("Failed to read line: " + strconv.Itoa(i) + ": " + buf)
 		}
 	}
 	err = filebuf.Err()
@@ -99,63 +102,32 @@ func (cfg Config) Update() (error, Config) {
 }
 
 // cfgparseline reads a single line of the config and returns the type and content of the line
-func cfgparseline(buf string) (uint8, string) {
-	// State options
-	// 0 - Init
-	// 1 - Error
-	// 2 - Comment
-	// 3 - Site
-	// 4 - Download
-	// 5 - Whitelist
-	var state uint8 = 0
-	body := buf[:]
-	for i := 0; i < len(buf); i++ {
-		//fmt.Printf("%c",buf[i])
-		switch buf[i] {
+func cfgparseline(buf string, cfg *Config) (fail bool) {
+	if len(buf) == 0 {
+		return
+	}
+		switch buf[0] {
 		case ' ':
 		case '#':
-			state = 2
+			return
 		case 'd':
-			if len(buf) < i+10 {
-				state = 1
-				break
-			}
-			if buf[i:(i+9)] == "download=" {
-				i += 9
-				state = 4
-				body = buf[i:]
+			if (len(buf) > 10 && buf[0:9] == "download=") {
+				cfg.Downloads = append(cfg.Downloads, buf[9:])
 			} else {
-				state = 1
+				fail = true
 			}
 		case 's':
-			if len(buf) < i+6 {
-				state = 1
-				break
-			}
-			if buf[i:(i+5)] == "site=" {
-				i += 5
-				state = 3
-				body = buf[i:]
+			if (len(buf) > 6 && buf[0:5] == "site=") {
+				cfg.Sites = append(cfg.Sites, buf[5:])
 			} else {
-				state = 0
+				fail = true
 			}
-			//compare buf[i:(i+3)] to "site"
 		case 'w':
-			if len(buf) < i+10 {
-				state = 1
-				break
-			}
-			if buf[i:(i+10)] == "whitelist=" {
-				i += 10
-				state = 5
-				body = buf[i:]
+			if (len(buf) > 10 && buf[0:10] == "whitelist=") {
+				cfg.Whitelist = append(cfg.Whitelist, buf[9:])
 			} else {
-				state = 1
+				fail = true
 			}
-		}
-		if state != 0 {
-			return state, body
-		}
 	}
-	return state, body
+	return
 }
