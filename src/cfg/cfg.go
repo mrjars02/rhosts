@@ -22,7 +22,13 @@ const CFG = `
 #whitelist=www.site.xyz
 
 # A suggested download is: https://github.com/StevenBlack/hosts
-#download=https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts`
+#download=https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+
+# Webserver
+# This will allow you to intercept and alter messages
+
+# It is disabled by default
+#Webserver=true`
 
 type Config struct {
 	CfgLoc    string
@@ -35,6 +41,9 @@ type Config struct {
 		HostsLoc string
 		CfgLoc string
 		Var string
+	}
+	WebServer struct {
+		Enabled bool
 	}
 }
 
@@ -125,6 +134,12 @@ func cfgparseline(buf string, cfg *Config) (fail bool) {
 		case 'w':
 			if (len(buf) > 10 && buf[0:10] == "whitelist=") {
 				cfg.Whitelist = append(cfg.Whitelist, buf[9:])
+			} else if (len(buf) > 10 && buf[0:10] == "webserver=") {
+				if (len(buf[10:]) >= 4 && buf[10:] == "true"){
+					cfg.WebServer.Enabled = true
+				}else if (len(buf[10:]) >= 5 && buf[10:] == "false"){
+					cfg.WebServer.Enabled = false
+				}else {fail = true}
 			} else {
 				fail = true
 			}
