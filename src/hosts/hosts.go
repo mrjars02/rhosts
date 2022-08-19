@@ -21,33 +21,35 @@ type siteEntry struct {
 	site   string
 }
 
-func Update(config cfg.Config, tmpdir, hostsloc string) (err error) {
+func Update() (err error) {
+	err, config := cfg.Create()
+	if (err != nil){return}
 	var siteBuff []siteList
 
 	err = error(nil)
-	err = copystatichosts(tmpdir, hostsloc)
+	err = copystatichosts(config.System.TmpDir, config.System.HostsLoc)
 	if err != nil {
 		log.Print("Failed to copy static entries")
 		return
 	}
-	defer os.Remove(tmpdir + "rhosts")
-	err, siteBuff = downloadcontent(config.Downloads, tmpdir, hostsloc)
+	defer os.Remove(config.System.TmpDir + "rhosts")
+	err, siteBuff = downloadcontent(config.Downloads, config.System.TmpDir, config.System.HostsLoc)
 	if err != nil {
 		log.Print("Failed to download entries")
 		return
 	}
-	err = writesites(config.Sites, tmpdir, &siteBuff)
+	err = writesites(config.Sites, config.System.TmpDir, &siteBuff)
 	if err != nil {
 		log.Print("Failed to failed to copy rhosts static entries")
 		return
 	}
 	removeduplicates(&siteBuff, &config.Whitelist)
-	err = write2tmp(tmpdir, &siteBuff)
+	err = write2tmp(config.System.TmpDir, &siteBuff)
 	if err != nil {
 		log.Print("Failed to write sites to tmpfile")
 		return
 	}
-	err = writetmp2hosts(hostsloc, tmpdir)
+	err = writetmp2hosts(config.System.HostsLoc, config.System.TmpDir)
 	if err != nil {
 		log.Print("Failed to copy to hosts file")
 		return

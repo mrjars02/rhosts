@@ -23,7 +23,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"jbreich/rhosts/cfg"
 	"jbreich/rhosts/hosts"
 	"jbreich/rhosts/serve"
 	"log"
@@ -83,22 +82,19 @@ func main() {
 		log.Print("interval:", interval)
 	}
 
-	_, config := cfg.Create()
-
-
 	// Starting web server
 	serve.Start("blank")
 
 	// Update the hosts file
 	if daemon == false {
-		err := hosts.Update(config, config.System.TmpDir, config.System.HostsLoc)
+		err := hosts.Update()
 		if err != nil {
 			log.Print(err)
 		}
 	} else {
 
 		for true {
-			err := hosts.Update(config, config.System.TmpDir, config.System.HostsLoc)
+			err := hosts.Update()
 			if err != nil {
 				log.Print(err)
 			}
