@@ -97,8 +97,10 @@ func main() {
 	log.Print(config)
 	if (err != nil){log.Panic("Failed to parse config: " + cfgloc)}
 
+
+
 	for true {
-		err := hosts.Update(config, tmpdir, hostsloc,daemon, interval)
+		err := hosts.Update(config, tmpdir, hostsloc)
 		if (err != nil){
 			log.Print(err)
 		}
