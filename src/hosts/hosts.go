@@ -1,57 +1,58 @@
 package hosts
 
 import (
-	"os"
-	"io"
-	"net/http"
-	"log"
 	"bufio"
+	"io"
 	"jbreich/rhosts/cfg"
+	"log"
+	"net/http"
+	"os"
 )
 
 // siteList holds the location of all the sites along with a list of their location
 type siteList struct {
-	location string
+	location  string
 	siteEntry []siteEntry
 }
+
 // siteEntry holds a single entry and if it is a repeat
 type siteEntry struct {
 	repeat bool
-	site string
+	site   string
 }
 
-func Update(config cfg.Config, tmpdir, hostsloc string)(err error){
+func Update(config cfg.Config, tmpdir, hostsloc string) (err error) {
 	var siteBuff []siteList
 
 	err = error(nil)
 	err = copystatichosts(tmpdir, hostsloc)
-	if (err != nil){
+	if err != nil {
 		log.Print("Failed to copy static entries")
-		return nil
+		return
 	}
 	defer os.Remove(tmpdir + "rhosts")
 	err, siteBuff = downloadcontent(config.Downloads, tmpdir, hostsloc)
-	if (err != nil){
+	if err != nil {
 		log.Print("Failed to download entries")
-		return nil
+		return
 	}
 	err = writesites(config.Sites, tmpdir, &siteBuff)
-	if (err != nil){
+	if err != nil {
 		log.Print("Failed to failed to copy rhosts static entries")
-		return nil
+		return
 	}
 	removeduplicates(&siteBuff, &config.Whitelist)
 	err = write2tmp(tmpdir, &siteBuff)
-	if (err != nil){
+	if err != nil {
 		log.Print("Failed to write sites to tmpfile")
-		return nil
+		return
 	}
 	err = writetmp2hosts(hostsloc, tmpdir)
-	if (err != nil){
+	if err != nil {
 		log.Print("Failed to copy to hosts file")
-		return nil
+		return
 	}
-
+	log.Print("Finished updating host")
 	return
 }
 
@@ -72,33 +73,34 @@ func copystatichosts(tmpdir, hostsloc string) error {
 	}
 	filebuf := bufio.NewScanner(filer)
 	filebuf.Split(bufio.ScanLines)
-	for res := filebuf.Scan();res;res = filebuf.Scan() {
+	for res := filebuf.Scan(); res; res = filebuf.Scan() {
 		buff := filebuf.Text()
-		if (buff == "# rhosts begin"){
+		if buff == "# rhosts begin" {
 			break
 		}
-		_,err := file.WriteString(buff + "\n")
-		if (err != nil) {
+		_, err := file.WriteString(buff + "\n")
+		if err != nil {
 			log.Print(err)
 			return err
 		}
 	}
-	_,err = file.WriteString("# rhosts begin\n")
+	_, err = file.WriteString("# rhosts begin\n")
 	err = filebuf.Err()
 	return err
 }
+
 // downloadcontent attempts to download the provided url and create a siteList. If the file fails to download it attempts to find an old copy from the hosts file.
-func downloadcontent(downloads []string, tmpdir string, hostsloc string) (err error, list []siteList){
+func downloadcontent(downloads []string, tmpdir string, hostsloc string) (err error, list []siteList) {
 	for _, d := range downloads {
 		var site siteList
 		site.location = d
-		log.Print("Downloading: ",d)
+		log.Print("Downloading: ", d)
 		response, err := http.Get(d)
-		if (err !=nil) {
+		if err != nil {
 			log.Print(err)
 			log.Print("Looking for old record in hosts file")
 			downloadoldlookup(hostsloc, d, &site)
-		}else{
+		} else {
 			defer response.Body.Close()
 			scanner := bufio.NewScanner(response.Body)
 			for scanner.Scan() {
@@ -114,22 +116,22 @@ func downloadcontent(downloads []string, tmpdir string, hostsloc string) (err er
 }
 
 // checkDownloadLine parses the download line into just the address that needs to be blocked
-func checkDownloadLine (line string) (address siteEntry){
+func checkDownloadLine(line string) (address siteEntry) {
 	var token []string
 	address.repeat = false
 	address.site = ""
 	buff := ""
-	lineLength := len(line) -1
-	for i, c := range(line){
+	lineLength := len(line) - 1
+	for i, c := range line {
 		if c != ' ' && i < lineLength {
 			buff += string(c)
-		}else if len(buff) > 0 {
-			if i == lineLength{
+		} else if len(buff) > 0 {
+			if i == lineLength {
 				buff += string(c)
 			}
-			token = append(token,buff)
+			token = append(token, buff)
 			buff = ""
-			}
+		}
 	}
 	if len(token) == 0 {
 		return
@@ -137,15 +139,15 @@ func checkDownloadLine (line string) (address siteEntry){
 	if token[0][0] == '#' {
 		return
 	}
-	for _, t := range(token) {
+	for _, t := range token {
 		var period uint
 		var failed bool
 		period = 0
 		failed = false
-		for _, c := range(t) {
-			switch c{
+		for _, c := range t {
+			switch c {
 			case '.':
-				period ++
+				period++
 			case '#':
 				return
 			case ':':
@@ -153,7 +155,7 @@ func checkDownloadLine (line string) (address siteEntry){
 				break
 			}
 		}
-		if period <=2 && failed == false {
+		if period <= 2 && failed == false {
 			address.site = t
 			return
 		}
@@ -165,9 +167,9 @@ func checkDownloadLine (line string) (address siteEntry){
 func downloadoldlookup(hostsloc, d string, site *siteList) error {
 	var err error = nil
 	var state uint8 = 0
-	
+
 	hostsf, err := os.Open(hostsloc)
-	if (err != nil){
+	if err != nil {
 		log.Print(err)
 		return err
 	}
@@ -175,18 +177,18 @@ func downloadoldlookup(hostsloc, d string, site *siteList) error {
 
 	fbuff := bufio.NewScanner(hostsf)
 	fbuff.Split(bufio.ScanLines)
-	for res := fbuff.Scan();res;res = fbuff.Scan() {
+	for res := fbuff.Scan(); res; res = fbuff.Scan() {
 		buff := fbuff.Text()
 		switch state {
 		case 0:
-			if (buff == "# rhosts download - " + d){
+			if buff == "# rhosts download - "+d {
 				log.Print("Found old record in hosts file:" + buff)
-				state =1
+				state = 1
 			}
 		case 1:
-			if (len(buff) >=9 && buff[0:8] == "# rhosts"){
+			if len(buff) >= 9 && buff[0:8] == "# rhosts" {
 				state = 2
-			}else{
+			} else {
 				siteBuff := checkDownloadLine(buff)
 				if siteBuff.site != "" {
 					site.siteEntry = append(site.siteEntry, siteBuff)
@@ -195,7 +197,7 @@ func downloadoldlookup(hostsloc, d string, site *siteList) error {
 		case 3:
 			return nil
 		}
-			
+
 	}
 
 	return err
@@ -211,17 +213,18 @@ func writesites(sites []string, tmpdir string, siteBuff *[]siteList) (err error)
 	if len(sites) == 0 {
 		return
 	}
-	for _,s := range sites {
+	for _, s := range sites {
 		var site siteEntry
 		site.repeat = false
 		site.site = s
-		localList.siteEntry = append(localList.siteEntry,site)
+		localList.siteEntry = append(localList.siteEntry, site)
 	}
-	*siteBuff = append(*siteBuff,localList)
+	*siteBuff = append(*siteBuff, localList)
 	return
 }
+
 // removeduplicates removes any duplicate or uneeded/unwanted addresses
-func removeduplicates(siteBuff *[]siteList, whitelist *[]string){
+func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 	var safewords = []string{"localhost", "localhost.localdomain", "broadcasthost", "ip6-loopback", "ip6-localhost", "ip6-localnet", "ip6-mcastprefix", "ip6-allnodes", "ip6-allrouters", "ip6-allhosts", "local"}
 	var c struct {
 		d uint
@@ -232,37 +235,37 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string){
 	c.s = 0
 	c.w = 0
 	log.Print("Checking for duplicates")
-	var entry []struct{
+	var entry []struct {
 		r *bool
 		s *string
 	}
-	var entryBuff struct{
+	var entryBuff struct {
 		r *bool
 		s *string
 	}
-	for i := len((*siteBuff))-1; i > -1; i --{
-		for j := len((*siteBuff)[i].siteEntry)-1; j > -1; j -- {
+	for i := len((*siteBuff)) - 1; i > -1; i-- {
+		for j := len((*siteBuff)[i].siteEntry) - 1; j > -1; j-- {
 			entryBuff.r = &((*siteBuff)[i].siteEntry[j].repeat)
 			entryBuff.s = &((*siteBuff)[i].siteEntry[j].site)
-			entry = append(entry,entryBuff)
+			entry = append(entry, entryBuff)
 		}
 	}
 	lenEntry := len(entry)
-	for i,e := range(entry) {
-		for _,w := range(safewords){
+	for i, e := range entry {
+		for _, w := range safewords {
 			if *e.s == w {
 				*(entry[i].r) = true
-				c.s ++
+				c.s++
 				break
 			}
 		}
 		if *(entry[i].r) == true {
 			continue
 		}
-		for _,w := range(*whitelist){
+		for _, w := range *whitelist {
 			if *e.s == w {
 				*(entry[i].r) = true
-				c.w ++
+				c.w++
 				break
 			}
 		}
@@ -272,35 +275,36 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string){
 		if i == lenEntry {
 			break
 		}
-		for j,n := range(entry[i+1:]){
+		for j, n := range entry[i+1:] {
 			if *e.s == *n.s {
 				*(entry[i+j].r) = true
-				c.d ++
+				c.d++
 			}
 		}
 
 	}
 	log.Printf("Total: %d\tDuplicates: %d\tSafeWords: %d\tWhitelisted: %d\n", lenEntry, c.d, c.s, c.w)
 }
+
 // write2tmp write the siteBuff to the tempfile
 func write2tmp(tmpdir string, siteBuff *[]siteList) (err error) {
 	err = nil
-	tmploc := tmpdir+ "rhosts"
+	tmploc := tmpdir + "rhosts"
 	tmpf, err := os.OpenFile(tmploc, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	defer tmpf.Close()
 	if err != nil {
 		log.Print(err)
 		return err
 	}
-	for _,location := range(*siteBuff){
+	for _, location := range *siteBuff {
 		if len(location.siteEntry) == 0 {
 			continue
 		}
-		_,err := tmpf.WriteString("# rhosts download - " + location.location + "\n")
-			if err != nil {
-				return err
-			}
-		for _,site := range(location.siteEntry){
+		_, err := tmpf.WriteString("# rhosts download - " + location.location + "\n")
+		if err != nil {
+			return err
+		}
+		for _, site := range location.siteEntry {
 			if site.repeat == false {
 				_, err = tmpf.WriteString("0.0.0.0 " + site.site + "\n")
 				if err != nil {
@@ -315,26 +319,26 @@ func write2tmp(tmpdir string, siteBuff *[]siteList) (err error) {
 	}
 	return
 }
+
 // writetmp2hosts overwrites the hostsfile with the tmp file
 func writetmp2hosts(hostsloc, tmpdir string) error {
 	var err error = nil
 	tmploc := tmpdir + "rhosts"
 
 	hosts, err := os.Create(hostsloc)
-	if (err != nil){
+	if err != nil {
 		log.Print(err)
 		return err
 	}
 	tmp, err := os.Open(tmploc)
-	if (err != nil){
+	if err != nil {
 		log.Print(err)
 		return err
 	}
-	_,err = io.Copy(hosts,tmp)
-	if (err != nil){
+	_, err = io.Copy(hosts, tmp)
+	if err != nil {
 		log.Print(err)
 	}
-
 
 	return err
 }
