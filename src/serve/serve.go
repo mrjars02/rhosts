@@ -4,10 +4,16 @@ package serve
 import (
 	"net/http"
 	"jbreich/rhosts/cfg"
+	"log"
 )
 
-func Start() {
+func Start(exit chan bool) {
 	config := cfg.Create()
+	if config.WebServer.Enabled == false {
+		log.Print("Made it this far")
+		exit <- true
+		return
+	}
 	go httpServer()
 	go httpsServer(config.System.Var + "/certs/")
 

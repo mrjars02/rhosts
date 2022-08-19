@@ -29,7 +29,6 @@ import (
 	"time"
 )
 
-var Exit chan bool
 
 const GPL = `
     rhosts maintains a blocklist and appends it to the system hosts file
@@ -51,6 +50,7 @@ const GPL = `
 `
 
 func main() {
+	exit := make(chan bool)
 	var daemon bool = false
 	var interval int = 1440
 	var versionflag bool = false
@@ -83,7 +83,7 @@ func main() {
 	}
 
 	// Starting web server
-	serve.Start()
+	go serve.Start(exit)
 
 	// Update the hosts file
 	if daemon == false {
@@ -112,5 +112,5 @@ func main() {
 			}
 		}
 	}
-	<-Exit
+	<-exit
 }
