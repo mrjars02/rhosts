@@ -22,8 +22,7 @@ type siteEntry struct {
 }
 
 func Update() (err error) {
-	err, config := cfg.Create()
-	if (err != nil){return}
+	config := cfg.Create()
 	var siteBuff []siteList
 
 	err = error(nil)

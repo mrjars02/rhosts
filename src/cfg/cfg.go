@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"log"
 	"os"
-	"errors"
 )
 
 const CFG = `
@@ -34,6 +33,7 @@ type Config struct {
 		TmpDir string
 		HostsLoc string
 		CfgLoc string
+		Var string
 	}
 }
 
@@ -41,12 +41,14 @@ type Config struct {
 var configFuncs []func(*Config)
 
 // Create initialized a config to be used the entire session
-func Create() (err error,cfg Config) {
+func Create() (cfg Config) {
 	for _,fp := range(configFuncs){
 		fp(&cfg)
 	}
-	if (cfg.System.OS == ""){return errors.New("Failed to detect the OS"), cfg}
-	err, cfg = cfg.Update()
+	if (cfg.System.OS == ""){log.Panic("Failed to detect the OS")}
+	err, cfg := cfg.Update()
+
+	if (err != nil){log.Panic("Failed to handle the config file: " + err.Error())}
 	return
 }
 
