@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"errors"
 )
 
 const CFG = `
@@ -28,24 +29,37 @@ type Config struct {
 	Sites     []string
 	Downloads []string
 	Whitelist []string
+	System struct {
+		OS string
+		TmpDir string
+		HostsLoc string
+		CfgLoc string
+	}
 }
 
+// Used to hold a list of functions to be run when building
+var configFuncs []func(*Config)
+
 // Create initialized a config to be used the entire session
-func Create(cfgLoc string) (cfg Config) {
-	cfg.CfgLoc = cfgLoc
+func Create() (err error,cfg Config) {
+	for _,fp := range(configFuncs){
+		fp(&cfg)
+	}
+	if (cfg.System.OS == ""){return errors.New("Failed to detect the OS"), cfg}
+	err, cfg = cfg.Update()
 	return
 }
 
 // cfgparse recieves the location of the config file and returns a list of sites to add and content to download
 func (cfg Config) Update() (error, Config) {
-	l := (cfg.CfgLoc + "rhosts.cfg")
+	l := (cfg.System.CfgLoc + "rhosts.cfg")
 	var err error = nil
 	log.Print("Opening: ", l)
-	if _, err = os.Stat(cfg.CfgLoc); os.IsNotExist(err) {
-		log.Print(cfg.CfgLoc + " Does not exist, attempting to create it")
-		err = os.MkdirAll(cfg.CfgLoc, 0755)
+	if _, err = os.Stat(cfg.System.CfgLoc); os.IsNotExist(err) {
+		log.Print(cfg.System.CfgLoc + " Does not exist, attempting to create it")
+		err = os.MkdirAll(cfg.System.CfgLoc, 0755)
 		if err != nil {
-			log.Fatal("Could not create " + cfg.CfgLoc)
+			log.Fatal("Could not create " + cfg.System.CfgLoc)
 		}
 	}
 	if _, err = os.Stat(l); os.IsNotExist(err) {

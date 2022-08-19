@@ -26,7 +26,6 @@ import (
 	"jbreich/rhosts/cfg"
 	"jbreich/rhosts/hosts"
 	"jbreich/rhosts/serve"
-	sysos "jbreich/rhosts/sys"
 	"log"
 	"time"
 )
@@ -53,9 +52,6 @@ const GPL = `
 `
 
 func main() {
-	tmpdir := ""
-	hostsloc := ""
-	cfgloc := ""
 	var daemon bool = false
 	var interval int = 1440
 	var versionflag bool = false
@@ -87,28 +83,22 @@ func main() {
 		log.Print("interval:", interval)
 	}
 
-	sysos.Detect(&tmpdir, &hostsloc, &cfgloc)
+	_, config := cfg.Create()
 
-	// Read the config file
-	config := cfg.Create(cfgloc)
-	err, config := config.Update()
-	if err != nil {
-		log.Panic("Failed to parse config: " + cfgloc)
-	}
 
 	// Starting web server
 	serve.Start("blank")
 
 	// Update the hosts file
 	if daemon == false {
-		err := hosts.Update(config, tmpdir, hostsloc)
+		err := hosts.Update(config, config.System.TmpDir, config.System.HostsLoc)
 		if err != nil {
 			log.Print(err)
 		}
 	} else {
 
 		for true {
-			err := hosts.Update(config, tmpdir, hostsloc)
+			err := hosts.Update(config, config.System.TmpDir, config.System.HostsLoc)
 			if err != nil {
 				log.Print(err)
 			}
