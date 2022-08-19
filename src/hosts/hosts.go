@@ -20,7 +20,7 @@ type siteEntry struct {
 	site string
 }
 
-func Update(config cfg.Config, tmpdir, hostsloc string, daemon bool, interval int)(err error){
+func Update(config cfg.Config, tmpdir, hostsloc string)(err error){
 	var siteBuff []siteList
 
 	err = error(nil)
