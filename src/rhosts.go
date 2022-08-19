@@ -31,7 +31,11 @@ import (
 	"time"
 	"fmt"
 	sysos "jbreich/rhosts/sys"
+	"jbreich/rhosts/serve"
 )
+
+var Exit chan bool
+
 // siteList holds the location of all the sites along with a list of their location
 type siteList struct {
 	location string
@@ -147,6 +151,8 @@ func main() {
 			break
 		}
 	}
+	serve.Start("blank")
+	<- Exit
 }
 
 
