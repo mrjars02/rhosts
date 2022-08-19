@@ -22,7 +22,6 @@
 package main
 
 import (
-	"runtime"
 	"os"
 	"io"
 	"bufio"
@@ -31,6 +30,7 @@ import (
 	"flag"
 	"time"
 	"fmt"
+	sysos "jbreich/rhosts/sys"
 )
 // siteList holds the location of all the sites along with a list of their location
 type siteList struct {
@@ -99,7 +99,7 @@ func main() {
 		log.Print("interval:",interval)
 	}
 
-	sysdetect (&tmpdir, &hostsloc, &cfgloc)
+	sysos.Detect (&tmpdir, &hostsloc, &cfgloc)
 
 	for true {
 		var sites, downloads, whitelist []string
@@ -149,25 +149,6 @@ func main() {
 	}
 }
 
-// sysdetect determines which OS it is running on and set the default locations
-func sysdetect (tmpdir, hostsloc, cfgloc *string) {
-	// Detect OS and set params
-	switch runtime.GOOS {
-	case "windows":
-		//log.Fatal("Windows is not supported")
-		*tmpdir = "/tmp"
-		*hostsloc = "/Windows/System32/drivers/etc/hosts"
-		*cfgloc = "/ProgramData/rhosts/"
-	case "linux":
-		*tmpdir = "/tmp/"
-		*hostsloc = "/etc/hosts"
-		*cfgloc ="/etc/rhosts/"
-	case "ios":
-		log.Fatal("IOS is not supported")
-	default:
-		log.Fatal(runtime.GOOS," is not supported")
-	}
-}
 
 // cfgparse recieves the location of the config file and returns a list of sites to add and content to download
 func cfgparse (sites, downloads, whitelist *[]string, cfgloc string) (error){
