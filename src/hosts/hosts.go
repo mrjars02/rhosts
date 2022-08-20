@@ -257,13 +257,23 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 		}
 	}
 
-	// Removing safewords
-	log.Print("Checking for safewords")
+	// Removing safewords and whitelisted words
+	log.Print("Checking for safewords and whitelisted words")
 	for i,e := range entry {
+		if (*e.r == true) {
+			continue
+		}
 		for _,w := range(safewords) {
 			if *e.s == w {
 				*(entry[i].r) = true
 				c.s++
+				break
+			}
+		}
+		for _, w := range *whitelist {
+			if *e.s == w {
+				*(entry[i].r) = true
+				c.w++
 				break
 			}
 		}
@@ -275,13 +285,6 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 	for i, e := range entry {
 		if *(entry[i].r) == true {
 			continue
-		}
-		for _, w := range *whitelist {
-			if *e.s == w {
-				*(entry[i].r) = true
-				c.w++
-				break
-			}
 		}
 		if *(entry[i].r) == true {
 			continue
