@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 )
 
 // siteList holds the location of all the sites along with a list of their location
@@ -19,6 +20,11 @@ type siteList struct {
 type siteEntry struct {
 	repeat bool
 	site   string
+}
+
+type siteEntryPointer struct {
+	r *bool
+	s   *string
 }
 
 func Update() (err error) {
@@ -42,7 +48,7 @@ func Update() (err error) {
 		log.Print("Failed to failed to copy rhosts static entries")
 		return
 	}
-	removeduplicates(&siteBuff, &config.Whitelist)
+	removeUnwanted(&siteBuff, &config.Whitelist)
 	err = write2tmp(config.System.TmpDir, &siteBuff)
 	if err != nil {
 		log.Print("Failed to write sites to tmpfile")
@@ -224,8 +230,8 @@ func writesites(sites []string, tmpdir string, siteBuff *[]siteList) (err error)
 	return
 }
 
-// removeduplicates removes any duplicate or uneeded/unwanted addresses
-func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
+// removeUnwanted removes any duplicate or uneeded/unwanted addresses
+func removeUnwanted(siteBuff *[]siteList, whitelist *[]string) {
 	// Words that will be remove automatically, they hold significant importance
 	var safewords = []string{"localhost", "localhost.localdomain", "broadcasthost", "ip6-loopback", "ip6-localhost", "ip6-localnet", "ip6-mcastprefix", "ip6-allnodes", "ip6-allrouters", "ip6-allhosts", "local"}
 
@@ -239,14 +245,8 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 	c.s = 0
 	c.w = 0
 
-	var entry []struct {
-		r *bool
-		s *string
-	}
-	var entryBuff struct {
-		r *bool
-		s *string
-	}
+	var entry []siteEntryPointer
+	var entryBuff siteEntryPointer
 
 	// Add downloads to buffered list of sites
 	for i := len((*siteBuff)) - 1; i > -1; i-- {
@@ -281,27 +281,42 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 
 	// Removing duplicates
 	log.Print("Checking for duplicates")
+	cores := runtime.NumCPU()
+	fin := make(chan uint)
+	for i := cores; i > 0 ; i-- {
+		go removeDuplicate(entry[i-1:],cores, fin)
+	} 
+	for ;cores > 0; cores-- {
+		count :=<-fin
+		c.d =+ count
+	}
 	lenEntry := len(entry)
+
+	log.Printf("Total: %d\tDuplicates: %d\tSafeWords: %d\tWhitelisted: %d\n", lenEntry, c.d, c.s, c.w)
+}
+
+// RemoveDuplicate removes duplicates from a range
+func removeDuplicate (entry []siteEntryPointer, freq int , done chan uint){
+	var cd uint
 	for i, e := range entry {
-		if *(entry[i].r) == true {
+		if (i+1)%freq != 0 {
 			continue
 		}
-		if *(entry[i].r) == true {
+		if *e.r == true || (i+1)%freq != 0 {
 			continue
-		}
-		if i == lenEntry {
-			break
 		}
 		for j, n := range entry[i+1:] {
+			if *e.r == true {
+				continue
+			}
 			if *e.s == *n.s {
 				*(entry[i+j].r) = true
-				c.d++
+				cd++
 			}
 		}
 
 	}
-
-	log.Printf("Total: %d\tDuplicates: %d\tSafeWords: %d\tWhitelisted: %d\n", lenEntry, c.d, c.s, c.w)
+	done <- cd
 }
 
 // write2tmp write the siteBuff to the tempfile
