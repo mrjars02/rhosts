@@ -48,6 +48,11 @@ const GPL = `
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 `
+const usage = `
+This program's settings are modified by the rhost.cfg file and by setting the following flags:
+
+`
+
 
 func main() {
 	exit := make(chan bool)
@@ -57,6 +62,10 @@ func main() {
 	var versionflag bool = false
 	var removetimestamp bool = false
 
+	flag.Usage = func() {                                                  // [4]
+		fmt.Fprintf(flag.CommandLine.Output(), GPL + usage)
+		flag.PrintDefaults()
+	}
 	// Parsing Flags
 	flag.BoolVar(&webserver, "s", false, "Turn on the Webserver")
 	flag.BoolVar(&daemon, "d", false, "Should this be run in daemon mode")
