@@ -51,12 +51,14 @@ const GPL = `
 
 func main() {
 	exit := make(chan bool)
+	var webserver bool = false
 	var daemon bool = false
 	var interval int = 1440
 	var versionflag bool = false
 	var removetimestamp bool = false
 
 	// Parsing Flags
+	flag.BoolVar(&webserver, "s", false, "Turn on the Webserver")
 	flag.BoolVar(&daemon, "d", false, "Should this be run in daemon mode")
 	flag.IntVar(&interval, "t", 1440, "Minutes until next run of daemon")
 	flag.BoolVar(&versionflag, "version", false, "show version information")
@@ -83,8 +85,10 @@ func main() {
 	}
 
 	// Starting web server
-	go serve.Start(exit)
-
+	if (webserver == true){
+		go serve.Start(exit)
+		defer func(){<-exit}()
+	}
 	// Update the hosts file
 	if daemon == false {
 		err := hosts.Update()
@@ -112,5 +116,4 @@ func main() {
 			}
 		}
 	}
-	<-exit
 }

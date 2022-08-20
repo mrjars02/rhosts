@@ -10,7 +10,7 @@ import (
 func Start(exit chan bool) {
 	config := cfg.Create()
 	if config.WebServer.Enabled == false {
-		log.Print("Made it this far")
+		log.Print("Webserver was disabled in the config file")
 		exit <- true
 		return
 	}
