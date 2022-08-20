@@ -226,7 +226,10 @@ func writesites(sites []string, tmpdir string, siteBuff *[]siteList) (err error)
 
 // removeduplicates removes any duplicate or uneeded/unwanted addresses
 func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
+	// Words that will be remove automatically, they hold significant importance
 	var safewords = []string{"localhost", "localhost.localdomain", "broadcasthost", "ip6-loopback", "ip6-localhost", "ip6-localnet", "ip6-mcastprefix", "ip6-allnodes", "ip6-allrouters", "ip6-allhosts", "local"}
+
+	// Counters for how many sites were not added because: downloads, safewords, whitelisted
 	var c struct {
 		d uint
 		s uint
@@ -235,6 +238,7 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 	c.d = 0
 	c.s = 0
 	c.w = 0
+
 	log.Print("Checking for duplicates")
 	var entry []struct {
 		r *bool
@@ -244,6 +248,8 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 		r *bool
 		s *string
 	}
+
+	// Add downloads to buffered list of sites
 	for i := len((*siteBuff)) - 1; i > -1; i-- {
 		for j := len((*siteBuff)[i].siteEntry) - 1; j > -1; j-- {
 			entryBuff.r = &((*siteBuff)[i].siteEntry[j].repeat)
@@ -251,6 +257,8 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 			entry = append(entry, entryBuff)
 		}
 	}
+
+	// Remove safewords and duplicates
 	lenEntry := len(entry)
 	for i, e := range entry {
 		for _, w := range safewords {
@@ -284,6 +292,7 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 		}
 
 	}
+
 	log.Printf("Total: %d\tDuplicates: %d\tSafeWords: %d\tWhitelisted: %d\n", lenEntry, c.d, c.s, c.w)
 }
 
