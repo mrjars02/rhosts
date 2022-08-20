@@ -282,15 +282,20 @@ func removeUnwanted(siteBuff *[]siteList, whitelist *[]string) {
 	// Removing duplicates
 	log.Print("Checking for duplicates")
 	cores := runtime.NumCPU()
-	fin := make(chan uint)
-	for i := cores; i > 0 ; i-- {
-		go removeDuplicate(entry[i-1:],cores, fin)
-	} 
-	for ;cores > 0; cores-- {
-		count :=<-fin
-		c.d =+ count
-	}
 	lenEntry := len(entry)
+
+	if (cores <= lenEntry){
+		fin := make(chan uint)
+		for i := cores; i > 0 ; i-- {
+			go removeDuplicate(entry[i-1:],cores, fin)
+		} 
+		for ;cores > 0; cores-- {
+			count :=<-fin
+			c.d =+ count
+		}
+	} else {
+		removeDuplicate(entry,1, nil)
+	}
 
 	log.Printf("Total: %d\tDuplicates: %d\tSafeWords: %d\tWhitelisted: %d\n", lenEntry, c.d, c.s, c.w)
 }
@@ -316,7 +321,9 @@ func removeDuplicate (entry []siteEntryPointer, freq int , done chan uint){
 		}
 
 	}
-	done <- cd
+	if (done != nil){
+		done <- cd
+	}
 }
 
 // write2tmp write the siteBuff to the tempfile
