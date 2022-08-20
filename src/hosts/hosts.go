@@ -239,7 +239,6 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 	c.s = 0
 	c.w = 0
 
-	log.Print("Checking for duplicates")
 	var entry []struct {
 		r *bool
 		s *string
@@ -258,16 +257,22 @@ func removeduplicates(siteBuff *[]siteList, whitelist *[]string) {
 		}
 	}
 
-	// Remove safewords and duplicates
-	lenEntry := len(entry)
-	for i, e := range entry {
-		for _, w := range safewords {
+	// Removing safewords
+	log.Print("Checking for safewords")
+	for i,e := range entry {
+		for _,w := range(safewords) {
 			if *e.s == w {
 				*(entry[i].r) = true
 				c.s++
 				break
 			}
 		}
+	}
+
+	// Removing duplicates
+	log.Print("Checking for duplicates")
+	lenEntry := len(entry)
+	for i, e := range entry {
 		if *(entry[i].r) == true {
 			continue
 		}
