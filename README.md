@@ -18,19 +18,6 @@ Build for Windows on Linux:
 
     make build-win
 
-### Windows  
-
-Build Dependencies:  
-
-- Requires go https://go.dev/doc/install#windows  
-
-Windows:   
-
-    cd src
-    go build .
-
-**Building has not been tested on Windows; however, it will fail because the version.go file is generated using the Makefile**
-
 ## How to use
 
 ### Configuring
