@@ -97,7 +97,7 @@ func (ca CA) Initialize() (CA, error) {
 func fillFromFile(ca CA) (CA, error) {
 	var err error
 
-	file := path.Join(ca.Location + ca.Name)
+	file := path.Join(ca.Location , ca.Name)
 	_, err = os.Stat(file + ".crt")
 	if err != nil {
 		return ca, err
